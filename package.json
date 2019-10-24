@@ -1,23 +1,35 @@
 {
   "name": "sprite-nodes-links",
-  "version": "0.0.1",
-  "description": "sprite nodes links",
+  "version": "1.0.0",
+  "description": "sprite-nodes-links",
   "main": "lib/index.js",
   "scripts": {
-    "build": "npx babel src --out-dir lib --source-maps",
-    "prepublishOnly": "npm run build"
+    "build": "rimraf lib && webpack --config webpack.production.js",
+    "start": "webpack-dev-server --config webpack.development.js",
+    "test": "npm run test"
+  },
+  "directories": {
+    "example": "examples"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "webpack": "^4.41.2",
+    "webpack-cli": "^3.3.9",
+    "webpack-dev-server": "^3.9.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yaotaiyang/sprite-nodes-links.git"
   },
   "keywords": [
-    "js",
-    "clone",
-    "filter"
+    "sprite",
+    "nodes",
+    "links"
   ],
-  "author": "yaotaiyang99@gmail.com",
+  "author": "yaotaiyang",
   "license": "MIT",
-  "devDependencies": {
-    "@babel/cli": "^7.5.5",
-    "@babel/core": "^7.5.5",
-    "@babel/preset-env": "^7.5.5"
+  "bugs": {
+    "url": "https://github.com/yaotaiyang/sprite-nodes-links/issues"
   },
-  "dependencies": {}
+  "homepage": "https://github.com/yaotaiyang/sprite-nodes-links#readme"
 }
