@@ -6,9 +6,7 @@ class Node extends Base {
   constructor(attrs) {
     super(attrs)
     let defaultAttrs = {
-      selector: '',
-      size: [600, 400],
-      zoom: [0.5, 2]
+      pos: [0, 0]
     }
     let thisAttrs = Object.assign(defaultAttrs, attrs)
     this.attr(thisAttrs)
@@ -19,6 +17,29 @@ class Node extends Base {
     if (attrDrag !== false) {
       this.draggable()
     }
+    let { pos } = thisAttrs
+    this.container.attr({ pos })
+    this.container.on('drag', e => {
+      let myId = this.attr('id')
+      this.stage.links.forEach(link => {
+        let { startId, endId } = link.attr()
+        if (startId === myId || endId === myId) {
+          link.move()
+        }
+      })
+    })
+    this.container.on('dragstart', e => {
+      this.container.attr({ zIndex: 110 })
+    })
+    this.container.on('dragend', e => {
+      this.stage.nodes.forEach(node => {
+        if (node === this) {
+          this.container.attr({ zIndex: 101 })
+        } else {
+          node.container.attr({ zIndex: 100 })
+        }
+      })
+    })
   }
   draw() {
     let txt = this.attr('text') || 'node'
@@ -27,7 +48,9 @@ class Node extends Base {
       border: { color: '#ccc', width: 1, style: 'solid' },
       padding: [2, 6],
       bgcolor: '#fff',
-      borderRadius: [5]
+      borderRadius: [5],
+      pos: ['-50%', '-50%']
+      //anchor: ['50%', '50%']
     })
     this.append(label)
   }

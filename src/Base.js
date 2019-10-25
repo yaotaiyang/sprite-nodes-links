@@ -4,7 +4,7 @@ import { draggable } from 'sprite-draggable'
 class Base extends BaseNode {
   constructor(attrs) {
     super()
-    //this.attr(attrs)
+    this.attr(attrs)
     this.__attrs = extendsObject(null)
     this.container = new Group()
     this.container.attr({ size: [0.1, 0.1], clipOverflow: false }) // 将group设置成非常小，不影响其他dom，并且不clip内部元素

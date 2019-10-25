@@ -1,11 +1,25 @@
 import Base from './Base'
+import { Polyline } from 'spritejs'
 class Link extends Base {
   constructor(attrs) {
     super(attrs)
+    this.attr(attrs)
+    this.$line = null
   }
   draw() {
+    this.$line = new Polyline()
+    this.append(this.$line)
+    this.move()
+  }
+  move() {
     let { startId, endId } = this.attr()
-    console.log(startId, endId)
+    let startNode = this.stage.nodes.filter(node => node.attr('id') === startId)[0]
+    let endNode = this.stage.nodes.filter(node => node.attr('id') === endId)[0]
+    let startPoint = startNode.container.attr('pos')
+    let endPoint = endNode.container.attr('pos')
+    if (this.$line) {
+      this.$line.attr({ points: [startPoint, endPoint] })
+    }
   }
   remove() {
     let myStage = this.stage

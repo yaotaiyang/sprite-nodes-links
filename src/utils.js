@@ -28,10 +28,9 @@ function guid() {
   })
 }
 function extendsObject(...args) {
-  let res = Object.create(null)
-  if (args[0] !== null) {
-    res = Object.assign(...args)
-  }
-  return res
+  let cArgs = args.map(a => {
+    return a ? a : Object.create(null)
+  })
+  return Object.assign(...cArgs)
 }
 export { guid, getType, extendsObject }

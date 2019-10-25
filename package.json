@@ -12,6 +12,7 @@
     "example": "examples"
   },
   "dependencies": {
+    "@spritejs/shapes": "^1.1.7",
     "filter-clone": "^0.0.10",
     "sprite-draggable": "^0.1.18"
   },
