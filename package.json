@@ -1,6 +1,6 @@
 {
   "name": "sprite-nodes-links",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "sprite-nodes-links",
   "main": "lib/index.js",
   "scripts": {
@@ -11,7 +11,10 @@
   "directories": {
     "example": "examples"
   },
-  "dependencies": {},
+  "dependencies": {
+    "filter-clone": "^0.0.10",
+    "sprite-draggable": "^0.1.18"
+  },
   "devDependencies": {
     "webpack": "^4.41.2",
     "webpack-cli": "^3.3.9",
