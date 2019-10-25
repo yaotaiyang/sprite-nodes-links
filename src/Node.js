@@ -18,8 +18,8 @@ class Node extends Base {
       this.draggable()
     }
     let { pos } = thisAttrs
-    this.container.attr({ pos })
-    this.container.on('drag', e => {
+    this.container.attr({ pos, zIndex: 100 })
+    this.on('drag', e => {
       let myId = this.attr('id')
       this.stage.links.forEach(link => {
         let { startId, endId } = link.attr()
@@ -28,10 +28,10 @@ class Node extends Base {
         }
       })
     })
-    this.container.on('dragstart', e => {
+    this.on('dragstart', e => {
       this.container.attr({ zIndex: 110 })
     })
-    this.container.on('dragend', e => {
+    this.on('dragend', e => {
       this.stage.nodes.forEach(node => {
         if (node === this) {
           this.container.attr({ zIndex: 101 })
@@ -48,11 +48,12 @@ class Node extends Base {
       border: { color: '#ccc', width: 1, style: 'solid' },
       padding: [2, 6],
       bgcolor: '#fff',
-      borderRadius: [5],
-      pos: ['-50%', '-50%']
-      //anchor: ['50%', '50%']
+      borderRadius: [5]
     })
     this.append(label)
+  }
+  mounted() {
+    console.log('mounted', this.container.renderBox)
   }
   remove() {
     let myStage = this.stage

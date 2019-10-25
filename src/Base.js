@@ -5,9 +5,23 @@ class Base extends BaseNode {
   constructor(attrs) {
     super()
     this.attr(attrs)
+    this.sizeBox = [0, 0, 0, 0] // group内部大小
+    this.renderBox = [0, 0, 0, 0] // 对于外接容器大小
     this.__attrs = extendsObject(null)
     this.container = new Group()
     this.container.attr({ size: [0.1, 0.1], clipOverflow: false }) // 将group设置成非常小，不影响其他dom，并且不clip内部元素
+    ;['dragstart', 'drag', 'dragend', 'dragover', 'dragenter', 'dragleave', 'drop', 'click', 'dblclick', 'mouseenter', 'mouseleave', 'mousemove', 'mousedown'].forEach(evt => {
+      // 透传container上的事件
+      this.container.on(evt, e => {
+        this.dispatchEvent(evt, e)
+      })
+    })
+    this.on('mounted', this.mounted)
+    // 拖动的时候，修改renderBox
+    this.on('drag', () => {
+      const [oX, oY] = this.container.renderBox
+      this.renderBox = [oX + this.sizeBox[0], oY + this.sizeBox[1], oX + this.sizeBox[2], oY + this.sizeBox[3]]
+    })
   }
   pointCollision() {
     return true
@@ -55,6 +69,23 @@ class Base extends BaseNode {
   draw() {
     console.error('you must overwrite this function draw()')
   }
-  mounted() {}
+  mounted() {
+    let container = this.container
+    let [xMin, yMin, xMax, yMax] = this.sizeBox
+    this.renderBox = container.renderBox
+
+    let [oX, oY] = this.renderBox
+    if (container.children.length > 0) {
+      container.children.forEach(sprite => {
+        const renderBox = sprite.renderBox
+        xMin = Math.min(xMin, renderBox[0])
+        yMin = Math.min(yMin, renderBox[1])
+        xMax = Math.max(xMax, renderBox[2])
+        yMax = Math.max(yMax, renderBox[3])
+      })
+    }
+    this.sizeBox = [xMin, yMin, xMax, yMax]
+    this.renderBox = [oX + xMin, oY + yMin, oX + xMax, oY + yMax]
+  }
 }
 export default Base

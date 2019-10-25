@@ -46,35 +46,27 @@ class Stage extends Base {
         // 如果存在相同id的step，删除开始的一个
         let myId = nodes[i].attr('id')
         if (myId === curId) {
-          console.warn(
-            `exist the same Step(id:${curId}),please remove it first `
-          )
+          console.warn(`exist the same Step(id:${curId}),please remove it first `)
           return
         }
       }
       nodes.push(sprite)
     } else if (sprite instanceof Link) {
       let links = this.links
-      console.log('aaaa', sprite.attr())
       let { startId, endId } = sprite.attr()
       for (let i = 0; i < links.length; i++) {
         // 如果存在相同id的link，删除开始的一个
         let { startId: cStartId, endId: CEndId } = links[i].attr()
         if (cStartId === startId && CEndId === endStepId) {
-          console.warn(
-            `exist the same Link(startId:${startId},endId:${endId}),please remove it first `
-          )
+          console.warn(`exist the same Link(startId:${startId},endId:${endId}),please remove it first `)
           return
         }
       }
       if (startId === endId) {
         // 如果有相同的link
-        console.warn(
-          `the  Link(startId:${startId}),has the same startId and endId `
-        )
+        console.warn(`the  Link(startId:${startId}),has the same startId and endId `)
         return
       }
-      console.log('addlink')
       links.push(sprite)
     }
     this.container.append(sprite.render())
