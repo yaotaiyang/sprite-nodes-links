@@ -26,7 +26,9 @@ class Stage extends Base {
     scene.delegateEvent('mousewheel', document)
     this.layers.default.append(this.container)
     if (this.attr('zoom') !== false) {
-      zoom.call(this, this.layers.default, this.container)
+      this.containers.forEach(container => {
+        zoom.call(this, container.layer, container)
+      })
     }
   }
   append(sprite) {
@@ -78,33 +80,33 @@ class Stage extends Base {
     this.container.clear()
   }
 }
-function zoom(canvas, group) {
+function zoom(layer, group) {
   let oX, oY
   let startX, startY
   let draged = false
-  canvas.on('mousedown', e => {
+  layer.on('mousedown', e => {
     if (e.originalEvent.which === 3) {
       return
     }
     let $target = e.target
-    if ($target === canvas || $target === group) {
+    if ($target === layer || $target === group) {
       oX = e.offsetX
       oY = e.offsetY
       ;[startX, startY] = group.attr('pos')
       draged = true
     }
   })
-  canvas.on('mousemove', e => {
+  layer.on('mousemove', e => {
     if (draged) {
       let dx = e.offsetX - oX
       let dy = e.offsetY - oY
       group.transition(0).attr({ pos: [startX + dx, startY + dy] })
     }
   })
-  canvas.on('mouseup', e => {
+  layer.on('mouseup', e => {
     draged = false
   })
-  canvas.on('mousewheel', e => {
+  layer.on('mousewheel', e => {
     e.preventDefault()
     const [scaleX] = group.attr('scale')
     let [w, h] = group.attr('size')

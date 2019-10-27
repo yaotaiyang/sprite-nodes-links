@@ -5,8 +5,8 @@ class Base extends BaseNode {
   constructor(attrs) {
     super()
     this.attr(attrs)
-    this.sizeBox = [0, 0, 0, 0] // group内部大小
-    this.renderBox = [0, 0, 0, 0] // 对于外接容器大小
+    this.sizeBox = [0, 0, 0, 0] // 尺寸内部大小
+    this.renderBox = [0, 0, 0, 0] // 坐标大小
     this.__attrs = extendsObject(null)
     this.container = new Group()
     this.container.attr({ size: [0.1, 0.1], clipOverflow: false }) // 将group设置成非常小，不影响其他dom，并且不clip内部元素
@@ -73,7 +73,6 @@ class Base extends BaseNode {
     let container = this.container
     let [xMin, yMin, xMax, yMax] = this.sizeBox
     this.renderBox = container.renderBox
-
     let [oX, oY] = this.renderBox
     if (container.children.length > 0) {
       container.children.forEach(sprite => {

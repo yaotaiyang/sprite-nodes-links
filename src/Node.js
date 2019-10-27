@@ -48,12 +48,13 @@ class Node extends Base {
       border: { color: '#ccc', width: 1, style: 'solid' },
       padding: [2, 6],
       bgcolor: '#fff',
-      borderRadius: [5]
+      borderRadius: [5],
+      anchor: [0.5]
     })
     this.append(label)
   }
   mounted() {
-    console.log('mounted', this.container.renderBox)
+    super.mounted()
   }
   remove() {
     let myStage = this.stage
