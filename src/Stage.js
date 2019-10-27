@@ -2,7 +2,8 @@ import Base from './Base'
 import { Scene } from 'spritejs'
 import Node from './Node'
 import Link from './Link'
-import { getType } from './utils'
+import { getType, getDistansceByPoints, getPointByDistance } from './utils'
+import Ticks from './Ticks'
 class Stage extends Base {
   constructor(attrs) {
     super(attrs)
@@ -20,6 +21,7 @@ class Stage extends Base {
     })
     this.nodes = []
     this.links = []
+    this.ticks = new Ticks() //循环函数
     this.containers = [this.container]
     this.layers = Object.create(null)
     this.layers['default'] = scene.layer('default')
@@ -73,6 +75,21 @@ class Stage extends Base {
     }
     this.container.append(sprite.render())
     sprite.dispatchEvent('mounted', {})
+    this.checkForceLink()
+  }
+  checkForceLink() {
+    let hasForce = false
+    for (let i = 0; i < this.nodes.length; i++) {
+      let forceLink = this.nodes[i].attr('forceLink')
+      if (forceLink && forceLink.length > 0) {
+        hasForce = true
+        break
+      }
+    }
+    if (hasForce) {
+      this.ticks.clear()
+      this.ticks.add(tick.bind(this))
+    }
   }
   clear() {
     this.steps = []
@@ -80,7 +97,137 @@ class Stage extends Base {
     this.container.clear()
   }
 }
+function tick() {
+  //tick函数
+  let nodes = this.nodes
+  let links = this.links
+  for (let i = 0; i < nodes.length; i++) {
+    let sNode = nodes[i]
+    let sfl = sNode.attr('forceLink')
+    if (sfl && sfl[0] !== undefined) {
+      for (let j = i + 1; j < nodes.length; j++) {
+        let eNode = nodes[j]
+        let efl = eNode.attr('forceLink')
+        if (efl && efl[0] !== undefined) {
+          pushNode(sNode, eNode, sfl, efl)
+        }
+      }
+    }
+    if (sfl && sfl[1] !== undefined) {
+      for (let j = i + 1; j < nodes.length; j++) {
+        let eNode = nodes[j]
+        let efl = eNode.attr('forceLink')
+        if (efl && efl[1] !== undefined) {
+          let hasPull = false
+          for (let m = 0; m < links.length; m++) {
+            //两个node之间有link，则才可能会有引力
+            let { startId, endId } = links[m].attr()
+            if (startId === sNode.attr('id') && endId === eNode.attr('id')) {
+              hasPull = true
+              break
+            } else if (endId === sNode.attr('id') && startId === eNode.attr('id')) {
+              hasPull = true
+              break
+            }
+          }
+          if (hasPull) {
+            //引力
+            pullNode(sNode, eNode, sfl, efl)
+          }
+        }
+      }
+    }
+  }
+}
+function pullNode(sNode, eNode, sfl, efl) {
+  let dis1 = sNode.forceDistance
+  let dis2 = eNode.forceDistance
+  let pos1 = sNode.container.attr('pos')
+  let pos2 = eNode.container.attr('pos')
+  let currentDis = getDistansceByPoints(pos1, pos2)
+  let targetDis = dis1 * sfl[1] + dis2 * efl[1]
+  if (currentDis === 0) {
+    //如果距离为0，随机一个距离
+    let pos = [pos1[0] + Math.random() - 0.5, pos1[1] + Math.random() - 0.5]
+    sNode.container.attr({ pos: pos })
+  } else if (currentDis > targetDis + 1) {
+    let diffDis = Math.abs(currentDis - targetDis)
+    // 如果目标距离比当前距离大，则两个node需要被弹开
+    if (sNode.__dragging || eNode.__dragging) {
+      //如果有node被dragging
+      let moveNode = sNode
+      let sPos = pos1
+      let ePos = pos2
+      if (sNode.__dragging) {
+        moveNode = eNode
+        sPos = pos2
+        ePos = pos1
+      }
+      let point = getPointByDistance(sPos, ePos, diffDis / 2)
+      moveNode.container.attr({ pos: point })
+      moveNode.dispatchEvent('updatePos', {})
+    } else {
+      let move1 = (diffDis * dis1 * sfl[1]) / targetDis
+      let move2 = (diffDis * dis2 * efl[1]) / targetDis
+      if (Math.abs(move1) > 1) {
+        let point1 = getPointByDistance(pos1, pos2, move1 / 2) // 缓动，每次移动目标距离的一半
+        sNode.container.attr({ pos: point1 })
+        sNode.dispatchEvent('updatePos', {})
+      }
+      if (Math.abs(move2) > 1) {
+        let point2 = getPointByDistance(pos2, pos1, move2 / 2)
+        eNode.container.attr({ pos: point2 })
+        eNode.dispatchEvent('updatePos', {})
+      }
+    }
+  }
+}
+function pushNode(sNode, eNode, sfl, efl) {
+  //node 力的处理 开始节点，结束节点，开始的forceLink，结束节点的forceLink
+  let dis1 = sNode.forceDistance
+  let dis2 = eNode.forceDistance
+  let pos1 = sNode.container.attr('pos')
+  let pos2 = eNode.container.attr('pos')
+  let currentDis = getDistansceByPoints(pos1, pos2)
+  //弹力的处理分支
+  let targetDis = dis1 * sfl[0] + dis2 * efl[0]
+  if (currentDis === 0) {
+    //如果距离为0，随机一个距离
+    let pos = [pos1[0] + Math.random() - 0.5, pos1[1] + Math.random() - 0.5]
+    sNode.container.attr({ pos: pos })
+  } else if (currentDis < targetDis + 1) {
+    let diffDis = Math.abs(currentDis - targetDis)
+    // 如果目标距离比当前距离大，则两个node需要被弹开
+    if (sNode.__dragging || eNode.__dragging) {
+      //如果有node被dragging
+      let moveNode = sNode
+      let sPos = pos1
+      let ePos = pos2
+      if (sNode.__dragging) {
+        moveNode = eNode
+        sPos = pos2
+        ePos = pos1
+      }
+      let point = getPointByDistance(sPos, ePos, -diffDis / 2)
+      moveNode.container.attr({ pos: point })
+      moveNode.dispatchEvent('updatePos', {})
+    } else {
+      let move1 = (diffDis * dis1 * sfl[0]) / targetDis
+      let move2 = (diffDis * dis2 * efl[0]) / targetDis
+      if (Math.abs(move1) > 1) {
+        let point1 = getPointByDistance(pos1, pos2, -move1 / 2) // 缓动，每次移动目标距离的一半
+        sNode.container.attr({ pos: point1 })
+      }
+      if (Math.abs(move2) > 1) {
+        let point2 = getPointByDistance(pos2, pos1, -move2 / 2)
+        eNode.container.attr({ pos: point2 })
+        eNode.dispatchEvent('updatePos', {})
+      }
+    }
+  }
+}
 function zoom(layer, group) {
+  //舞台的拖动，缩放处理
   let oX, oY
   let startX, startY
   let draged = false

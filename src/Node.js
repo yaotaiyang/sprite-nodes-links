@@ -6,7 +6,8 @@ class Node extends Base {
   constructor(attrs) {
     super(attrs)
     let defaultAttrs = {
-      pos: [0, 0]
+      pos: [0, 0],
+      forceLink: [1, 2] //renderBox对角线的一半为基础，最小值与最大值
     }
     let thisAttrs = Object.assign(defaultAttrs, attrs)
     this.attr(thisAttrs)
@@ -20,13 +21,8 @@ class Node extends Base {
     let { pos } = thisAttrs
     this.container.attr({ pos, zIndex: 100 })
     this.on('drag', e => {
-      let myId = this.attr('id')
-      this.stage.links.forEach(link => {
-        let { startId, endId } = link.attr()
-        if (startId === myId || endId === myId) {
-          link.move()
-        }
-      })
+      this.dispatchEvent('updatePos', {})
+      this.__dragging = true
     })
     this.on('dragstart', e => {
       this.container.attr({ zIndex: 110 })
@@ -37,6 +33,16 @@ class Node extends Base {
           this.container.attr({ zIndex: 101 })
         } else {
           node.container.attr({ zIndex: 100 })
+        }
+      })
+      this.__dragging = false
+    })
+    this.on('updatePos', e => {
+      let myId = this.attr('id')
+      this.stage.links.forEach(link => {
+        let { startId, endId } = link.attr()
+        if (startId === myId || endId === myId) {
+          link.move()
         }
       })
     })
@@ -55,6 +61,8 @@ class Node extends Base {
   }
   mounted() {
     super.mounted()
+    let [xMin, yMin, xMax, yMax] = this.sizeBox
+    this.forceDistance = Math.sqrt((xMax - xMin) ** 2 + (yMax - yMin) ** 2) / 2
   }
   remove() {
     let myStage = this.stage
