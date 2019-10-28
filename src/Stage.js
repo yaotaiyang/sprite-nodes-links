@@ -61,7 +61,7 @@ class Stage extends Base {
       for (let i = 0; i < links.length; i++) {
         // 如果存在相同id的link，删除开始的一个
         let { startId: cStartId, endId: CEndId } = links[i].attr()
-        if (cStartId === startId && CEndId === endStepId) {
+        if (cStartId === startId && CEndId === endId) {
           console.warn(`exist the same Link(startId:${startId},endId:${endId}),please remove it first `)
           return
         }

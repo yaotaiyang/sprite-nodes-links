@@ -6,6 +6,7 @@ class Node extends Base {
   constructor(attrs) {
     super(attrs)
     let defaultAttrs = {
+      text: 'node',
       pos: [0, 0],
       forceLink: [1, 2] //renderBox对角线的一半为基础，最小值与最大值
     }
@@ -49,7 +50,7 @@ class Node extends Base {
     })
   }
   draw() {
-    let txt = this.attr('text') || 'node'
+    let txt = this.attr('text')
     let label = new Label(txt)
     label.attr({
       border: { color: '#ccc', width: 1, style: 'solid' },
