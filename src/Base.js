@@ -34,7 +34,6 @@ class Base extends BaseNode {
     } else {
       this.container.append(sprites)
     }
-    this.reSize()
   }
   /* 保持与spritejs 接口统一,拦截BaseNode attr */
   attr(name, value) {

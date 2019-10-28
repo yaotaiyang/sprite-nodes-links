@@ -2,7 +2,7 @@ import Base from './Base'
 import { Scene } from 'spritejs'
 import Node from './Node'
 import Link from './Link'
-import { getType, getDistansceByPoints, getPointByDistance } from './utils'
+import { getType, getDistansceByPoints, getPointByDistance, extendsObject } from './utils'
 import Ticks from './Ticks'
 class Stage extends Base {
   constructor(attrs) {
@@ -149,6 +149,7 @@ function tick() {
   }
   if (!animate) {
     //如果没有动画在执行，tick函数清空
+    this.dispatchEvent('animateComplete', extendsObject(null))
     this.tick.clear()
   }
 }
