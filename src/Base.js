@@ -10,7 +10,7 @@ class Base extends BaseNode {
     this.__attrs = extendsObject(null)
     this.container = new Group()
     this.container.attr({ size: [0.1, 0.1], clipOverflow: false }) // 将group设置成非常小，不影响其他dom，并且不clip内部元素
-    ;['dragstart', 'drag', 'dragend', 'dragover', 'dragenter', 'dragleave', 'drop', 'click', 'dblclick', 'mouseenter', 'mouseleave', 'mousemove', 'mousedown'].forEach(evt => {
+    ;['dragstart', 'drag', 'dragend', 'dragover', 'dragenter', 'dragleave', 'drop', 'click', 'dblclick', 'mouseenter', 'mouseleave', 'mousemove', 'mousedown', 'contextmenu'].forEach(evt => {
       // 透传container上的事件
       this.container.on(evt, e => {
         this.dispatchEvent(evt, e)

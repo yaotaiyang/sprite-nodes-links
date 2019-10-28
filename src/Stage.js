@@ -26,6 +26,7 @@ class Stage extends Base {
     this.layers = Object.create(null)
     this.layers['default'] = scene.layer('default')
     scene.delegateEvent('mousewheel', document)
+    scene.delegateEvent('contextmenu', document)
     this.layers.default.append(this.container)
     if (this.attr('zoom') !== false) {
       this.containers.forEach(container => {
