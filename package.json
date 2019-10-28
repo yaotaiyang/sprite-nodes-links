@@ -1,11 +1,12 @@
 {
   "name": "sprite-nodes-links",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "sprite-nodes-links",
   "main": "lib/index.js",
   "scripts": {
     "build": "rimraf lib && webpack --config webpack.production.js",
     "start": "webpack-dev-server --config webpack.development.js",
+    "prepublishOnly": "npm run build",
     "test": "npm run test"
   },
   "directories": {
