@@ -23,6 +23,7 @@ class Node extends Base {
     this.on('drag', e => {
       this.dispatchEvent('updatePos', {})
       this.__dragging = true
+      this.stage.checkForceLink()
     })
     this.on('dragstart', e => {
       this.container.attr({ zIndex: 110 })

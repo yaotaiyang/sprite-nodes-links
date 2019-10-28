@@ -21,7 +21,7 @@ class Stage extends Base {
     })
     this.nodes = []
     this.links = []
-    this.ticks = new Ticks() //循环函数
+    this.tick = new Ticks() //循环函数
     this.containers = [this.container]
     this.layers = Object.create(null)
     this.layers['default'] = scene.layer('default')
@@ -87,8 +87,8 @@ class Stage extends Base {
       }
     }
     if (hasForce) {
-      this.ticks.clear()
-      this.ticks.add(tick.bind(this))
+      this.tick.clear()
+      this.tick.add(tick.bind(this))
     }
   }
   clear() {
@@ -97,10 +97,12 @@ class Stage extends Base {
     this.container.clear()
   }
 }
+
 function tick() {
   //tick函数
   let nodes = this.nodes
   let links = this.links
+  let animate = false
   for (let i = 0; i < nodes.length; i++) {
     let sNode = nodes[i]
     let sfl = sNode.attr('forceLink')
@@ -109,7 +111,10 @@ function tick() {
         let eNode = nodes[j]
         let efl = eNode.attr('forceLink')
         if (efl && efl[0] !== undefined) {
-          pushNode(sNode, eNode, sfl, efl)
+          let res = pushNode(sNode, eNode, sfl, efl)
+          if (res) {
+            animate = true
+          }
         }
       }
     }
@@ -132,11 +137,18 @@ function tick() {
           }
           if (hasPull) {
             //引力
-            pullNode(sNode, eNode, sfl, efl)
+            let res = pullNode(sNode, eNode, sfl, efl)
+            if (res) {
+              animate = true
+            }
           }
         }
       }
     }
+  }
+  if (!animate) {
+    //如果没有动画在执行，tick函数清空
+    this.tick.clear()
   }
 }
 function pullNode(sNode, eNode, sfl, efl) {
@@ -146,6 +158,8 @@ function pullNode(sNode, eNode, sfl, efl) {
   let pos2 = eNode.container.attr('pos')
   let currentDis = getDistansceByPoints(pos1, pos2)
   let targetDis = dis1 * sfl[1] + dis2 * efl[1]
+  //判断是否有动画
+  let res = false
   if (currentDis === 0) {
     //如果距离为0，随机一个距离
     let pos = [pos1[0] + Math.random() - 0.5, pos1[1] + Math.random() - 0.5]
@@ -166,6 +180,7 @@ function pullNode(sNode, eNode, sfl, efl) {
       let point = getPointByDistance(sPos, ePos, diffDis / 2)
       moveNode.container.attr({ pos: point })
       moveNode.dispatchEvent('updatePos', {})
+      res = true
     } else {
       let move1 = (diffDis * dis1 * sfl[1]) / targetDis
       let move2 = (diffDis * dis2 * efl[1]) / targetDis
@@ -173,14 +188,17 @@ function pullNode(sNode, eNode, sfl, efl) {
         let point1 = getPointByDistance(pos1, pos2, move1 / 2) // 缓动，每次移动目标距离的一半
         sNode.container.attr({ pos: point1 })
         sNode.dispatchEvent('updatePos', {})
+        res = true
       }
       if (Math.abs(move2) > 1) {
         let point2 = getPointByDistance(pos2, pos1, move2 / 2)
         eNode.container.attr({ pos: point2 })
         eNode.dispatchEvent('updatePos', {})
+        res = true
       }
     }
   }
+  return res
 }
 function pushNode(sNode, eNode, sfl, efl) {
   //node 力的处理 开始节点，结束节点，开始的forceLink，结束节点的forceLink
@@ -189,6 +207,7 @@ function pushNode(sNode, eNode, sfl, efl) {
   let pos1 = sNode.container.attr('pos')
   let pos2 = eNode.container.attr('pos')
   let currentDis = getDistansceByPoints(pos1, pos2)
+  let res = false
   //弹力的处理分支
   let targetDis = dis1 * sfl[0] + dis2 * efl[0]
   if (currentDis === 0) {
@@ -211,20 +230,25 @@ function pushNode(sNode, eNode, sfl, efl) {
       let point = getPointByDistance(sPos, ePos, -diffDis / 2)
       moveNode.container.attr({ pos: point })
       moveNode.dispatchEvent('updatePos', {})
+      res = true
     } else {
       let move1 = (diffDis * dis1 * sfl[0]) / targetDis
       let move2 = (diffDis * dis2 * efl[0]) / targetDis
       if (Math.abs(move1) > 1) {
         let point1 = getPointByDistance(pos1, pos2, -move1 / 2) // 缓动，每次移动目标距离的一半
         sNode.container.attr({ pos: point1 })
+        sNode.dispatchEvent('updatePos', {})
+        res = true
       }
       if (Math.abs(move2) > 1) {
         let point2 = getPointByDistance(pos2, pos1, -move2 / 2)
         eNode.container.attr({ pos: point2 })
         eNode.dispatchEvent('updatePos', {})
+        res = true
       }
     }
   }
+  return res
 }
 function zoom(layer, group) {
   //舞台的拖动，缩放处理

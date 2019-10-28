@@ -10,9 +10,7 @@ if (!Date.now) {
   for (let i = 0; i < vendors.length && !window.requestAnimationFrame; ++i) {
     let vp = vendors[i]
     window.requestAnimationFrame = window[vp + 'RequestAnimationFrame']
-    window.cancelAnimationFrame =
-      window[vp + 'CancelAnimationFrame'] ||
-      window[vp + 'CancelRequestAnimationFrame']
+    window.cancelAnimationFrame = window[vp + 'CancelAnimationFrame'] || window[vp + 'CancelRequestAnimationFrame']
   }
   if (
     /iP(ad|hone|od).*OS 6/.test(window.navigator.userAgent) || // iOS6 is buggy
@@ -41,7 +39,7 @@ class Ticks {
     if (this.tasks.indexOf(func) === -1) {
       this.tasks.push(func)
     }
-    loop(func)
+    loop.bind(func)()
   }
   remove(func) {
     let curFunc = func
@@ -56,7 +54,7 @@ class Ticks {
   }
   stop(func) {
     if (func !== undefined) {
-      cancelAnimationFrame(func['__tickId'])
+      cancelAnimationFrame(func.__tickId)
     } else {
       this.tasks.forEach(task => {
         this.stop(task)
@@ -68,7 +66,7 @@ class Ticks {
       this.add(func)
     } else {
       this.tasks.forEach(task => {
-        loop(task)
+        loop.bind(task)()
       })
     }
   }
@@ -77,13 +75,9 @@ class Ticks {
     this.tasks = []
   }
 }
-function loop(func) {
-  func()
-  let resId = requestAnimationFrame(() => {
-    loop(func)
-  })
-  func['__tickId'] = resId
-  return resId
+function loop() {
+  this.__tickId = requestAnimationFrame(loop.bind(this))
+  this()
 }
 
 export default Ticks
