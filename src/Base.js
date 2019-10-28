@@ -34,6 +34,7 @@ class Base extends BaseNode {
     } else {
       this.container.append(sprites)
     }
+    this.reSize()
   }
   /* 保持与spritejs 接口统一,拦截BaseNode attr */
   attr(name, value) {
@@ -70,6 +71,9 @@ class Base extends BaseNode {
     console.error('you must overwrite this function draw()')
   }
   mounted() {
+    this.reSize()
+  }
+  reSize() {
     let container = this.container
     let [xMin, yMin, xMax, yMax] = this.sizeBox
     this.renderBox = container.renderBox

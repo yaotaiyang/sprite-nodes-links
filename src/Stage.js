@@ -76,6 +76,7 @@ class Stage extends Base {
     this.container.append(sprite.render())
     sprite.dispatchEvent('mounted', {})
     this.checkForceLink()
+    this.reSize()
   }
   checkForceLink() {
     let hasForce = false

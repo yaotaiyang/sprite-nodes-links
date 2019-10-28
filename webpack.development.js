@@ -8,6 +8,7 @@ module.exports = {
   output: {
     path: path.resolve(__dirname, '/'),
     filename: '[name].js',
+    library: 'spriteNodesLinks',
     libraryTarget: 'umd'
   },
   devtool: 'source-map',
