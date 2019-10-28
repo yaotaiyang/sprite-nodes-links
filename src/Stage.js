@@ -212,8 +212,8 @@ function pushNode(sNode, eNode, sfl, efl) {
   let targetDis = dis1 * sfl[0] + dis2 * efl[0]
   if (currentDis === 0) {
     //如果距离为0，随机一个距离
-    let pos = [pos1[0] + Math.random() - 0.5, pos1[1] + Math.random() - 0.5]
-    sNode.container.attr({ pos: pos })
+    pos2 = [pos1[0] + Math.random() - 0.5, pos1[1] + Math.random() - 0.5]
+    eNode.container.attr({ pos: pos2 })
   } else if (currentDis < targetDis + 1) {
     let diffDis = Math.abs(currentDis - targetDis)
     // 如果目标距离比当前距离大，则两个node需要被弹开

@@ -79,4 +79,4 @@ function getPointByDistance(point1, point2, distance) {
   const y = (distance * (y2 - y1)) / r + y1
   return [x, y]
 }
-export { guid, getType, extendsObject, getAngleByPoints, getDistansceByPoints, getPointByDistance }
+export { guid, getType, extendsObject, getAngleByPoints, getDistansceByPoints, getPointByDistance, getPolygonIntersectionPoint }
