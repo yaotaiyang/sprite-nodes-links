@@ -77,7 +77,7 @@ class Base extends BaseNode {
   }
   reSize() {
     let container = this.container
-    let [xMin, yMin, xMax, yMax] = this.sizeBox
+    let [xMin, yMin, xMax, yMax] = [0, 0, 0, 0]
     this.renderBox = container.renderBox
     let [oX, oY] = this.renderBox
     if (container.children.length > 0) {
