@@ -263,12 +263,12 @@ function zoom(layer, group) {
       return
     }
     let $target = e.target
-    if ($target === layer || $target === group) {
-      oX = e.offsetX
-      oY = e.offsetY
-      ;[startX, startY] = group.attr('pos')
-      draged = true
-    }
+    //if ($target === layer || $target === group) {
+    oX = e.offsetX
+    oY = e.offsetY
+    ;[startX, startY] = group.attr('pos')
+    draged = true
+    //}
   })
   layer.on('mousemove', e => {
     if (draged) {

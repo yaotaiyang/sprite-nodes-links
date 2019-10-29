@@ -53,6 +53,9 @@ class Base extends BaseNode {
       this.__attrs[name] = value
       this.attrUpdate(extendsObject({ [name]: value }), oldAttr)
     }
+    if (name === 'pos') {
+      this.container.attr(name, value)
+    }
   }
   attrUpdate(newAttrs, oldAttrs) {}
   draggable(option) {
