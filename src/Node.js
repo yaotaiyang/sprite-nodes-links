@@ -27,6 +27,7 @@ class Node extends Base {
     this.on('drag', e => {
       this.__dragging = true
       this.attr('pos', this.container.attr('pos'))
+      this.stage.checkForceLink()
     })
     this.on('dragstart', e => {
       this.container.attr({ zIndex: 110 })
@@ -58,13 +59,14 @@ class Node extends Base {
     let res = super.attr(name, value)
     if (getType(name) === 'object') {
       for (let key in name) {
-        this.attr(key, name[key])
+        if (key === 'pos' && this.container) {
+          this.container.attr(key, name[key])
+          this.moveLink()
+        }
       }
-    } else if (name === 'pos') {
-      if (this.container) {
-        this.container.attr(name, value)
-        this.moveLink()
-      }
+    } else if (name === 'pos' && this.container) {
+      this.container.attr(name, value)
+      this.moveLink()
     }
     return res
   }
