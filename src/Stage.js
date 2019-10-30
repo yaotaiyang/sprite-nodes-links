@@ -209,17 +209,6 @@ function moveNode(sNode, eNode, currentDis, targetDis) {
     if (move) {
       res = move
     }
-    // if (!moveNode.attr('fixed')) {
-    //   let point = getPointByDistance(sPos, ePos, diffDis / 2)
-    //   let forceAxis = moveNode.attr('forceAxis')
-    //   if (forceAxis === 'x') {
-    //     point[0] = moveNode.attr('pos')[0]
-    //   } else if (forceAxis === 'y') {
-    //     point[1] = moveNode.attr('pos')[1]
-    //   }
-    //   moveNode.attr({ pos: point })
-    //   res = true
-    // }
   } else {
     let move1 = (diffDis * weight1) / (weight1 + weight2)
     let move2 = (diffDis * weight2) / (weight1 + weight2)
