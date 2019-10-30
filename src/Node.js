@@ -1,6 +1,6 @@
 import Base from './Base'
 import { Label } from 'spritejs'
-import { guid } from './utils'
+import { guid, getType } from './utils'
 
 class Node extends Base {
   constructor(attrs) {
@@ -8,6 +8,8 @@ class Node extends Base {
     let defaultAttrs = {
       text: 'node',
       pos: [0, 0],
+      weight: 1, //权重，权重越大引力产生影响越小
+      fixed: false, //是否固定位置不受力的影响
       forceLink: [1, 2] //renderBox对角线的一半为基础，最小值与最大值
     }
     let thisAttrs = Object.assign(defaultAttrs, attrs)
@@ -22,8 +24,8 @@ class Node extends Base {
     let { pos } = thisAttrs
     this.container.attr({ pos, zIndex: 100 })
     this.on('drag', e => {
-      this.dispatchEvent('updatePos', {})
       this.__dragging = true
+      this.moveLink()
       this.stage.checkForceLink()
     })
     this.on('dragstart', e => {
@@ -38,16 +40,33 @@ class Node extends Base {
         }
       })
       this.__dragging = false
+      this.stage.checkForceLink()
     })
-    this.on('updatePos', e => {
-      let myId = this.attr('id')
+  }
+  moveLink() {
+    let myId = this.attr('id')
+    if (this.stage && this.stage.links) {
       this.stage.links.forEach(link => {
         let { startId, endId } = link.attr()
         if (startId === myId || endId === myId) {
           link.move()
         }
       })
-    })
+    }
+  }
+  attr(name, value) {
+    let res = super.attr(name, value)
+    if (getType(name) === 'object') {
+      for (let key in name) {
+        this.attr(key, name[key])
+      }
+    } else if (name === 'pos') {
+      if (this.container) {
+        this.container.attr(name, value)
+        this.moveLink()
+      }
+    }
+    return res
   }
   draw() {
     let txt = this.attr('text')

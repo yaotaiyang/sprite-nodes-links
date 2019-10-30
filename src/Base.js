@@ -47,17 +47,17 @@ class Base extends BaseNode {
     } else if (getType(name) === 'object') {
       // 对象属性赋值 this.attr({'color':'#f00'})
       this.__attrs = extendsObject(this.__attrs, name)
-      this.attrUpdate(extendsObject(name), oldAttr)
+      //this.attrUpdate(extendsObject(name), oldAttr)
     } else if (getType(name) === 'string' && value !== undefined) {
       // 单一对象赋值 this.attr('color','#f00')
       this.__attrs[name] = value
-      this.attrUpdate(extendsObject({ [name]: value }), oldAttr)
+      //this.attrUpdate(extendsObject({ [name]: value }), oldAttr)
     }
-    if (name === 'pos') {
-      this.container.attr(name, value)
-    }
+    // if (name === 'pos') {
+    //   this.container.attr(name, value)
+    // }
   }
-  attrUpdate(newAttrs, oldAttrs) {}
+  //attrUpdate(newAttrs, oldAttrs) {}
   draggable(option) {
     draggable(this.container, option)
   }

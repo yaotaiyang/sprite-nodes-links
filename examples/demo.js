@@ -2,7 +2,7 @@ import { Node, Stage, Link } from '../src/index'
 let stage = new Stage({
   selector: '#app'
 })
-let node1 = new Node({ pos: [200, 200] })
+let node1 = new Node({ pos: [200, 200], fixed: true })
 let node2 = new Node({ pos: [200, 200] })
 let node3 = new Node({ pos: [200, 200] })
 let node4 = new Node({ pos: [200, 200] })

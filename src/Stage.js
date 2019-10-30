@@ -157,6 +157,8 @@ function tick() {
 function pullNode(sNode, eNode, sfl, efl) {
   let dis1 = sNode.forceDistance
   let dis2 = eNode.forceDistance
+  let weight1 = sNode.attr('weight')
+  let weight2 = sNode.attr('weight')
   let pos1 = sNode.container.attr('pos')
   let pos2 = eNode.container.attr('pos')
   let currentDis = getDistansceByPoints(pos1, pos2)
@@ -168,7 +170,7 @@ function pullNode(sNode, eNode, sfl, efl) {
     let pos = [pos1[0] + Math.random() - 0.5, pos1[1] + Math.random() - 0.5]
     sNode.container.attr({ pos: pos })
   } else if (currentDis > targetDis + 1) {
-    let diffDis = Math.abs(currentDis - targetDis)
+    let diffDis = currentDis - targetDis
     // 如果目标距离比当前距离大，则两个node需要被弹开
     if (sNode.__dragging || eNode.__dragging) {
       //如果有node被dragging
@@ -180,24 +182,29 @@ function pullNode(sNode, eNode, sfl, efl) {
         sPos = pos2
         ePos = pos1
       }
-      let point = getPointByDistance(sPos, ePos, diffDis / 2)
-      moveNode.container.attr({ pos: point })
-      moveNode.dispatchEvent('updatePos', {})
-      res = true
-    } else {
-      let move1 = (diffDis * dis1 * sfl[1]) / targetDis
-      let move2 = (diffDis * dis2 * efl[1]) / targetDis
-      if (Math.abs(move1) > 1) {
-        let point1 = getPointByDistance(pos1, pos2, move1 / 2) // 缓动，每次移动目标距离的一半
-        sNode.container.attr({ pos: point1 })
-        sNode.dispatchEvent('updatePos', {})
+      if (!moveNode.attr('fixed')) {
+        let point = getPointByDistance(sPos, ePos, diffDis / 2)
+        moveNode.attr({ pos: point })
         res = true
       }
+    } else {
+      let targetDis1 = (targetDis * weight1) / (weight1 + weight2)
+      let targetDis2 = (targetDis * weight2) / (weight1 + weight2)
+      let move1 = (diffDis * dis1 * sfl[1]) / targetDis1
+      let move2 = (diffDis * dis2 * efl[1]) / targetDis2
+      if (Math.abs(move1) > 1) {
+        if (!sNode.attr('fixed')) {
+          let point1 = getPointByDistance(pos1, pos2, move1 / 2) // 缓动，每次移动目标距离的一半
+          sNode.attr({ pos: point1 })
+          res = true
+        }
+      }
       if (Math.abs(move2) > 1) {
-        let point2 = getPointByDistance(pos2, pos1, move2 / 2)
-        eNode.container.attr({ pos: point2 })
-        eNode.dispatchEvent('updatePos', {})
-        res = true
+        if (!eNode.attr('fixed')) {
+          let point2 = getPointByDistance(pos2, pos1, move2 / 2)
+          eNode.attr({ pos: point2 })
+          res = true
+        }
       }
     }
   }
@@ -216,9 +223,9 @@ function pushNode(sNode, eNode, sfl, efl) {
   if (currentDis === 0) {
     //如果距离为0，随机一个距离
     pos2 = [pos1[0] + Math.random() - 0.5, pos1[1] + Math.random() - 0.5]
-    eNode.container.attr({ pos: pos2 })
+    eNode.attr({ pos: pos2 })
   } else if (currentDis < targetDis + 1) {
-    let diffDis = Math.abs(currentDis - targetDis)
+    let diffDis = currentDis - targetDis
     // 如果目标距离比当前距离大，则两个node需要被弹开
     if (sNode.__dragging || eNode.__dragging) {
       //如果有node被dragging
@@ -230,24 +237,83 @@ function pushNode(sNode, eNode, sfl, efl) {
         sPos = pos2
         ePos = pos1
       }
-      let point = getPointByDistance(sPos, ePos, -diffDis / 2)
-      moveNode.container.attr({ pos: point })
-      moveNode.dispatchEvent('updatePos', {})
-      res = true
+      if (!moveNode.attr('fixed')) {
+        let point = getPointByDistance(sPos, ePos, diffDis / 2)
+        moveNode.attr({ pos: point })
+        res = true
+      }
     } else {
       let move1 = (diffDis * dis1 * sfl[0]) / targetDis
       let move2 = (diffDis * dis2 * efl[0]) / targetDis
       if (Math.abs(move1) > 1) {
-        let point1 = getPointByDistance(pos1, pos2, -move1 / 2) // 缓动，每次移动目标距离的一半
-        sNode.container.attr({ pos: point1 })
-        sNode.dispatchEvent('updatePos', {})
-        res = true
+        if (!sNode.attr('fixed')) {
+          let point1 = getPointByDistance(pos1, pos2, move1 / 2) // 缓动，每次移动目标距离的一半
+          sNode.attr({ pos: point1 })
+          res = true
+        }
       }
       if (Math.abs(move2) > 1) {
-        let point2 = getPointByDistance(pos2, pos1, -move2 / 2)
-        eNode.container.attr({ pos: point2 })
-        eNode.dispatchEvent('updatePos', {})
+        if (!eNode.attr('fixed')) {
+          let point2 = getPointByDistance(pos2, pos1, move2 / 2)
+          eNode.attr({ pos: point2 })
+          res = true
+        }
+      }
+    }
+  }
+  return res
+}
+function forceNode(sNode, eNode, sfl, efl) {
+  let dis1 = sNode.forceDistance
+  let dis2 = eNode.forceDistance
+  let weight1 = sNode.attr('weight')
+  let weight2 = sNode.attr('weight')
+  let pos1 = sNode.container.attr('pos')
+  let pos2 = eNode.container.attr('pos')
+  let currentDis = getDistansceByPoints(pos1, pos2)
+  let targetDis = dis1 * sfl[1] + dis2 * efl[1]
+  //判断是否有动画
+  let res = false
+  if (currentDis === 0) {
+    //如果距离为0，随机一个距离
+    let pos = [pos1[0] + Math.random() - 0.5, pos1[1] + Math.random() - 0.5]
+    sNode.container.attr({ pos: pos })
+  } else if (currentDis > targetDis + 1) {
+    let diffDis = currentDis - targetDis
+    // 如果目标距离比当前距离大，则两个node需要被弹开
+    if (sNode.__dragging || eNode.__dragging) {
+      //如果有node被dragging
+      let moveNode = sNode
+      let sPos = pos1
+      let ePos = pos2
+      if (sNode.__dragging) {
+        moveNode = eNode
+        sPos = pos2
+        ePos = pos1
+      }
+      if (!moveNode.attr('fixed')) {
+        let point = getPointByDistance(sPos, ePos, diffDis / 2)
+        moveNode.attr({ pos: point })
         res = true
+      }
+    } else {
+      let targetDis1 = (targetDis * weight1) / (weight1 + weight2)
+      let targetDis2 = (targetDis * weight2) / (weight1 + weight2)
+      let move1 = (diffDis * dis1 * sfl[1]) / targetDis1
+      let move2 = (diffDis * dis2 * efl[1]) / targetDis2
+      if (Math.abs(move1) > 1) {
+        if (!sNode.attr('fixed')) {
+          let point1 = getPointByDistance(pos1, pos2, move1 / 2) // 缓动，每次移动目标距离的一半
+          sNode.attr({ pos: point1 })
+          res = true
+        }
+      }
+      if (Math.abs(move2) > 1) {
+        if (!eNode.attr('fixed')) {
+          let point2 = getPointByDistance(pos2, pos1, move2 / 2)
+          eNode.attr({ pos: point2 })
+          res = true
+        }
       }
     }
   }
