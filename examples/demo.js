@@ -3,7 +3,7 @@ let stage = new Stage({
   selector: '#app'
 })
 let node1 = new Node({ pos: [200, 200], fixed: true })
-let node2 = new Node({ pos: [200, 200] })
+let node2 = new Node({ pos: [200, 200], forceAxis: 'y' })
 let node3 = new Node({ pos: [200, 200] })
 let node4 = new Node({ pos: [200, 200] })
 let link1 = new Link({ startId: node1.attr('id'), endId: node2.attr('id') })

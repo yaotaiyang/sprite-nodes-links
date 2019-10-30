@@ -205,30 +205,51 @@ function moveNode(sNode, eNode, currentDis, targetDis) {
       sPos = pos2
       ePos = pos1
     }
-    if (!moveNode.attr('fixed')) {
-      let point = getPointByDistance(sPos, ePos, diffDis / 2)
-      moveNode.attr({ pos: point })
-      res = true
+    let move = posNode(moveNode, sPos, ePos, diffDis)
+    if (move) {
+      res = move
     }
+    // if (!moveNode.attr('fixed')) {
+    //   let point = getPointByDistance(sPos, ePos, diffDis / 2)
+    //   let forceAxis = moveNode.attr('forceAxis')
+    //   if (forceAxis === 'x') {
+    //     point[0] = moveNode.attr('pos')[0]
+    //   } else if (forceAxis === 'y') {
+    //     point[1] = moveNode.attr('pos')[1]
+    //   }
+    //   moveNode.attr({ pos: point })
+    //   res = true
+    // }
   } else {
     let move1 = (diffDis * weight1) / (weight1 + weight2)
     let move2 = (diffDis * weight2) / (weight1 + weight2)
     if (Math.abs(move1) > 1) {
-      if (!sNode.attr('fixed')) {
-        let point1 = getPointByDistance(pos1, pos2, move1 / 2) // 缓动，每次移动目标距离的一半
-        sNode.attr({ pos: point1 })
+      let move = posNode(sNode, pos1, pos2, move1)
+      if (move) {
         res = true
       }
     }
     if (Math.abs(move2) > 1) {
-      if (!eNode.attr('fixed')) {
-        let point2 = getPointByDistance(pos2, pos1, move2 / 2)
-        eNode.attr({ pos: point2 })
-        res = true
+      let move = posNode(eNode, pos2, pos1, move2)
+      if (move) {
+        res = move
       }
     }
   }
   return res
+}
+function posNode(node, pos1, pos2, move) {
+  if (!node.attr('fixed')) {
+    let point = getPointByDistance(pos1, pos2, move / 2)
+    let forceAxis = node.attr('forceAxis')
+    if (forceAxis === 'y') {
+      point[0] = node.attr('pos')[0]
+    } else if (forceAxis === 'x') {
+      point[1] = node.attr('pos')[1]
+    }
+    node.attr({ pos: point })
+    return true
+  }
 }
 function zoom(layer, group) {
   //舞台的拖动，缩放处理

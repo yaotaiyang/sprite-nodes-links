@@ -10,7 +10,8 @@ class Node extends Base {
       pos: [0, 0],
       weight: 1, //权重，权重越大引力产生影响越小
       fixed: false, //是否固定位置不受力的影响
-      forceLink: [1, 2] //renderBox对角线的一半为基础，最小值与最大值
+      forceLink: [1, 2], //renderBox对角线的一半为基础，最小值与最大值
+      forceAxis: '' //force生效坐标轴，可以为x，y
     }
     let thisAttrs = Object.assign(defaultAttrs, attrs)
     this.attr(thisAttrs)
