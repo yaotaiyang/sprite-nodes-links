@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "@spritejs/shapes": "^1.1.7",
+    "filter-clone": "0.0.11",
     "sprite-draggable": "^0.1.19"
   },
   "devDependencies": {
