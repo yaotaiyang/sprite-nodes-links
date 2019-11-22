@@ -77,11 +77,10 @@ class Stage extends Base {
     }
     this.container.append(sprite.render())
     sprite.dispatchEvent('mounted', {})
-
-    this.checkForceLink()
+    this.checkForceLink(true)
     this.reSize()
   }
-  checkForceLink() {
+  checkForceLink(start) {
     let hasForce = false
     for (let i = 0; i < this.nodes.length; i++) {
       let forceLink = this.nodes[i].attr('forceLink')
@@ -92,7 +91,7 @@ class Stage extends Base {
     }
     if (hasForce) {
       this.tick.clear()
-      this.tick.add(tick.bind(this))
+      this.tick.add(tick.bind(this, start))
     }
   }
   clear() {
@@ -102,7 +101,7 @@ class Stage extends Base {
   }
 }
 
-function tick() {
+function tick(start) {
   //tick函数
   let nodes = this.nodes
   let links = this.links
@@ -110,7 +109,13 @@ function tick() {
     return { ...filterClone(node.__attrs), ...filterClone(node, ['renderBox', '__dragging', 'sizeBox', 'forceDistance']) }
   })
   let linksAttr = links.map(link => link.__attrs)
-  let animate = computeForce(nodesAttr, linksAttr)
+  let animate = true
+  if (start) {
+    computeResult(nodesAttr, linksAttr)
+    animate = false
+  } else {
+    animate = computeForce(nodesAttr, linksAttr)
+  }
   nodes.forEach(node => {
     let attr = nodesAttr.filter(attr => attr.id === node.__attrs.id)
     if (attr && attr.length) {
@@ -121,6 +126,15 @@ function tick() {
     //如果没有动画在执行，tick函数清空
     this.dispatchEvent('animateComplete', extendsObject(null))
     this.tick.clear()
+  }
+}
+let loop = 0
+function computeResult(nodes, links) {
+  let ani = computeForce(nodes, links)
+  if (ani && loop < 500) {
+    console.log('next')
+    loop++
+    computeResult(nodes, links)
   }
 }
 function computeForce(nodes, links) {
@@ -239,13 +253,10 @@ function zoom(layer, group) {
     if (e.originalEvent.which === 3) {
       return
     }
-    let $target = e.target
-    //if ($target === layer || $target === group) {
     oX = e.offsetX
     oY = e.offsetY
     ;[startX, startY] = group.attr('pos')
     draged = true
-    //}
   })
   layer.on('mousemove', e => {
     if (draged) {
