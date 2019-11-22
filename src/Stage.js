@@ -81,7 +81,7 @@ class Stage extends Base {
     this.checkForceLink()
     this.reSize()
   }
-  checkForceLink() {
+  checkForceLink(num) {
     let hasForce = false
     for (let i = 0; i < this.nodes.length; i++) {
       let forceLink = this.nodes[i].attr('forceLink')
@@ -92,7 +92,7 @@ class Stage extends Base {
     }
     if (hasForce) {
       this.tick.clear()
-      this.tick.add(tick.bind(this))
+      this.tick.add(tick.bind(this, num))
     }
   }
   clear() {
@@ -101,8 +101,8 @@ class Stage extends Base {
     this.container.clear()
   }
 }
-
-function tick() {
+let tickNum = 0
+function tick(status) {
   //tick函数
   let nodes = this.nodes
   let links = this.links
@@ -176,7 +176,7 @@ function computePull(sNode, eNode, startForceLink, endForceLink) {
   let currentDis = getDistansceByPoints(pos1, pos2)
   let targetDis = dis1 * startForceLink[1] + dis2 * endForceLink[1]
   //判断是否有动画
-  if (currentDis === 0) {
+  if (currentDis === 0 && sNode.fixed !== true) {
     //如果距离为0，随机一个距离
     let pos = [pos1[0] + Math.random() - 0.5, pos1[1] + Math.random() - 0.5]
     sNode.pos = pos
@@ -233,7 +233,6 @@ function computeMove(sNode, eNode, currentDis, targetDis) {
       }
     }
   }
-  return res
 }
 function computePos(node, pos1, pos2, move) {
   if (!node.fixed) {
@@ -248,6 +247,7 @@ function computePos(node, pos1, pos2, move) {
     return true
   }
 }
+
 function zoom(layer, group) {
   //舞台的拖动，缩放处理
   let oX, oY

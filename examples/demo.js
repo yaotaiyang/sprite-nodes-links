@@ -1,9 +1,10 @@
 import { Node, Stage, Link } from '../src/index'
 let stage = new Stage({
   selector: '#app'
+  //animation: false
 })
 let node1 = new Node({ pos: [200, 200], fixed: true, text: '不受力固定点' })
-let node2 = new Node({ pos: [200, 200], text: 'y轴受力', forceAxis: 'y' })
+let node2 = new Node({ pos: [200, 200], text: 'y轴受力' })
 let node3 = new Node({ pos: [200, 200], text: '自由节点' })
 let node4 = new Node({ pos: [200, 200], text: '自由节点' })
 let link1 = new Link({ startId: node1.attr('id'), endId: node2.attr('id') })
