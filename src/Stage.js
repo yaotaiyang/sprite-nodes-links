@@ -81,7 +81,7 @@ class Stage extends Base {
     this.checkForceLink()
     this.reSize()
   }
-  checkForceLink(num) {
+  checkForceLink() {
     let hasForce = false
     for (let i = 0; i < this.nodes.length; i++) {
       let forceLink = this.nodes[i].attr('forceLink')
@@ -92,7 +92,7 @@ class Stage extends Base {
     }
     if (hasForce) {
       this.tick.clear()
-      this.tick.add(tick.bind(this, num))
+      this.tick.add(tick.bind(this))
     }
   }
   clear() {
@@ -101,8 +101,8 @@ class Stage extends Base {
     this.container.clear()
   }
 }
-let tickNum = 0
-function tick(status) {
+
+function tick() {
   //tick函数
   let nodes = this.nodes
   let links = this.links
@@ -117,8 +117,53 @@ function tick(status) {
       attr = node.attr({ pos: attr[0].pos })
     }
   })
+  //let animate = false
+  // for (let i = 0; i < nodes.length; i++) {
+  //   let sNode = nodes[i]
+  //   let startForceLink = sNode.attr('forceLink')
+  //   if (startForceLink && startForceLink[0] !== undefined) {
+  //     for (let j = i + 1; j < nodes.length; j++) {
+  //       let eNode = nodes[j]
+  //       let endForceLink = eNode.attr('forceLink')
+  //       if (endForceLink && endForceLink[0] !== undefined) {
+  //         let res = pushNode(sNode, eNode, startForceLink, endForceLink)
+  //         if (res) {
+  //           animate = true
+  //         }
+  //       }
+  //     }
+  //   }
+  //   if (startForceLink && startForceLink[1] !== undefined) {
+  //     for (let j = i + 1; j < nodes.length; j++) {
+  //       let eNode = nodes[j]
+  //       let endForceLink = eNode.attr('forceLink')
+  //       if (endForceLink && endForceLink[1] !== undefined) {
+  //         let hasPull = false
+  //         for (let m = 0; m < links.length; m++) {
+  //           //两个node之间有link，则才可能会有引力
+  //           let { startId, endId } = links[m].attr()
+  //           if (startId === sNode.attr('id') && endId === eNode.attr('id')) {
+  //             hasPull = true
+  //             break
+  //           } else if (endId === sNode.attr('id') && startId === eNode.attr('id')) {
+  //             hasPull = true
+  //             break
+  //           }
+  //         }
+  //         if (hasPull) {
+  //           //引力
+  //           let res = pullNode(sNode, eNode, startForceLink, endForceLink)
+  //           if (res) {
+  //             animate = true
+  //           }
+  //         }
+  //       }
+  //     }
+  //   }
+  // }
   if (!animate) {
     //如果没有动画在执行，tick函数清空
+    console.log()
     this.dispatchEvent('animateComplete', extendsObject(null))
     this.tick.clear()
   }
@@ -176,7 +221,7 @@ function computePull(sNode, eNode, startForceLink, endForceLink) {
   let currentDis = getDistansceByPoints(pos1, pos2)
   let targetDis = dis1 * startForceLink[1] + dis2 * endForceLink[1]
   //判断是否有动画
-  if (currentDis === 0 && sNode.fixed !== true) {
+  if (currentDis === 0) {
     //如果距离为0，随机一个距离
     let pos = [pos1[0] + Math.random() - 0.5, pos1[1] + Math.random() - 0.5]
     sNode.pos = pos
@@ -233,6 +278,7 @@ function computeMove(sNode, eNode, currentDis, targetDis) {
       }
     }
   }
+  return res
 }
 function computePos(node, pos1, pos2, move) {
   if (!node.fixed) {
@@ -247,7 +293,6 @@ function computePos(node, pos1, pos2, move) {
     return true
   }
 }
-
 function zoom(layer, group) {
   //舞台的拖动，缩放处理
   let oX, oY
