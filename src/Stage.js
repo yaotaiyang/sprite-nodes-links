@@ -4,6 +4,7 @@ import Node from './Node'
 import Link from './Link'
 import { getType, getDistansceByPoints, getPointByDistance, extendsObject } from './utils'
 import Ticks from './Ticks'
+import filterClone from 'filter-clone'
 class Stage extends Base {
   constructor(attrs) {
     super(attrs)
@@ -76,6 +77,7 @@ class Stage extends Base {
     }
     this.container.append(sprite.render())
     sprite.dispatchEvent('mounted', {})
+
     this.checkForceLink()
     this.reSize()
   }
@@ -104,42 +106,105 @@ function tick() {
   //tick函数
   let nodes = this.nodes
   let links = this.links
+  let nodesAttr = this.nodes.map(node => {
+    return { ...filterClone(node.__attrs), ...filterClone(node, ['renderBox', '__dragging', 'sizeBox', 'forceDistance']) }
+  })
+  let linksAttr = links.map(link => link.__attrs)
+  let animate = computeForce(nodesAttr, linksAttr)
+  nodes.forEach(node => {
+    let attr = nodesAttr.filter(attr => attr.id === node.__attrs.id)
+    if (attr && attr.length) {
+      attr = node.attr({ pos: attr[0].pos })
+    }
+  })
+  //let animate = false
+  // for (let i = 0; i < nodes.length; i++) {
+  //   let sNode = nodes[i]
+  //   let startForceLink = sNode.attr('forceLink')
+  //   if (startForceLink && startForceLink[0] !== undefined) {
+  //     for (let j = i + 1; j < nodes.length; j++) {
+  //       let eNode = nodes[j]
+  //       let endForceLink = eNode.attr('forceLink')
+  //       if (endForceLink && endForceLink[0] !== undefined) {
+  //         let res = pushNode(sNode, eNode, startForceLink, endForceLink)
+  //         if (res) {
+  //           animate = true
+  //         }
+  //       }
+  //     }
+  //   }
+  //   if (startForceLink && startForceLink[1] !== undefined) {
+  //     for (let j = i + 1; j < nodes.length; j++) {
+  //       let eNode = nodes[j]
+  //       let endForceLink = eNode.attr('forceLink')
+  //       if (endForceLink && endForceLink[1] !== undefined) {
+  //         let hasPull = false
+  //         for (let m = 0; m < links.length; m++) {
+  //           //两个node之间有link，则才可能会有引力
+  //           let { startId, endId } = links[m].attr()
+  //           if (startId === sNode.attr('id') && endId === eNode.attr('id')) {
+  //             hasPull = true
+  //             break
+  //           } else if (endId === sNode.attr('id') && startId === eNode.attr('id')) {
+  //             hasPull = true
+  //             break
+  //           }
+  //         }
+  //         if (hasPull) {
+  //           //引力
+  //           let res = pullNode(sNode, eNode, startForceLink, endForceLink)
+  //           if (res) {
+  //             animate = true
+  //           }
+  //         }
+  //       }
+  //     }
+  //   }
+  // }
+  if (!animate) {
+    //如果没有动画在执行，tick函数清空
+    console.log()
+    this.dispatchEvent('animateComplete', extendsObject(null))
+    this.tick.clear()
+  }
+}
+function computeForce(nodes, links) {
   let animate = false
   for (let i = 0; i < nodes.length; i++) {
     let sNode = nodes[i]
-    let sfl = sNode.attr('forceLink')
-    if (sfl && sfl[0] !== undefined) {
+    let startForceLink = sNode.forceLink
+    if (startForceLink && startForceLink[0] !== undefined) {
       for (let j = i + 1; j < nodes.length; j++) {
         let eNode = nodes[j]
-        let efl = eNode.attr('forceLink')
-        if (efl && efl[0] !== undefined) {
-          let res = pushNode(sNode, eNode, sfl, efl)
+        let endForceLink = eNode.forceLink
+        if (endForceLink && endForceLink[0] !== undefined) {
+          let res = computePush(sNode, eNode, startForceLink, endForceLink)
           if (res) {
             animate = true
           }
         }
       }
     }
-    if (sfl && sfl[1] !== undefined) {
+    if (startForceLink && startForceLink[1] !== undefined) {
       for (let j = i + 1; j < nodes.length; j++) {
         let eNode = nodes[j]
-        let efl = eNode.attr('forceLink')
-        if (efl && efl[1] !== undefined) {
+        let endForceLink = eNode.forceLink
+        if (endForceLink && endForceLink[1] !== undefined) {
           let hasPull = false
           for (let m = 0; m < links.length; m++) {
             //两个node之间有link，则才可能会有引力
-            let { startId, endId } = links[m].attr()
-            if (startId === sNode.attr('id') && endId === eNode.attr('id')) {
+            let { startId, endId } = links[m]
+            if (startId === sNode.id && endId === eNode.id) {
               hasPull = true
               break
-            } else if (endId === sNode.attr('id') && startId === eNode.attr('id')) {
+            } else if (endId === sNode.id && startId === eNode.id) {
               hasPull = true
               break
             }
           }
           if (hasPull) {
             //引力
-            let res = pullNode(sNode, eNode, sfl, efl)
+            let res = computePull(sNode, eNode, startForceLink, endForceLink)
             if (res) {
               animate = true
             }
@@ -148,37 +213,112 @@ function tick() {
       }
     }
   }
-  if (!animate) {
-    //如果没有动画在执行，tick函数清空
-    this.dispatchEvent('animateComplete', extendsObject(null))
-    this.tick.clear()
-  }
+  return animate
 }
-function pullNode(sNode, eNode, sfl, efl) {
-  let dis1 = sNode.forceDistance
-  let dis2 = eNode.forceDistance
-  let pos1 = sNode.container.attr('pos')
-  let pos2 = eNode.container.attr('pos')
+function computePull(sNode, eNode, startForceLink, endForceLink) {
+  let { forceDistance: dis1, pos: pos1 } = sNode
+  let { forceDistance: dis2, pos: pos2 } = eNode
   let currentDis = getDistansceByPoints(pos1, pos2)
-  let targetDis = dis1 * sfl[1] + dis2 * efl[1]
+  let targetDis = dis1 * startForceLink[1] + dis2 * endForceLink[1]
   //判断是否有动画
   if (currentDis === 0) {
     //如果距离为0，随机一个距离
     let pos = [pos1[0] + Math.random() - 0.5, pos1[1] + Math.random() - 0.5]
-    sNode.container.attr({ pos: pos })
+    sNode.pos = pos
+  } else if (currentDis > targetDis + 1) {
+    return computeMove(sNode, eNode, currentDis, targetDis)
+  }
+}
+function computePush(sNode, eNode, startForceLink, endForceLink) {
+  let { forceDistance: dis1, pos: pos1 } = sNode
+  let { forceDistance: dis2, pos: pos2 } = eNode
+  let currentDis = getDistansceByPoints(pos1, pos2)
+  let targetDis = dis1 * startForceLink[1] + dis2 * endForceLink[1]
+  if (currentDis === 0) {
+    //如果距离为0，随机一个距离
+    let pos = [pos1[0] + Math.random() - 0.5, pos1[1] + Math.random() - 0.5]
+    sNode.pos = pos
+  } else if (currentDis < targetDis + 1) {
+    return computeMove(sNode, eNode, currentDis, targetDis)
+  }
+}
+function computeMove(sNode, eNode, currentDis, targetDis) {
+  let res = false
+  let { pos: pos1, weight: weight1 } = sNode
+  let { pos: pos2, weight: weight2 } = eNode
+  let diffDis = currentDis - targetDis
+  // 如果目标距离比当前距离大，则两个node需要被弹开
+  if (sNode.__dragging || eNode.__dragging) {
+    //如果有node被dragging
+    let moveNode = sNode
+    let sPos = pos1
+    let ePos = pos2
+    if (sNode.__dragging) {
+      moveNode = eNode
+      sPos = pos2
+      ePos = pos1
+    }
+    let move = computePos(moveNode, sPos, ePos, diffDis)
+    if (move) {
+      res = move
+    }
+  } else {
+    let move1 = (diffDis * weight1) / (weight1 + weight2)
+    let move2 = (diffDis * weight2) / (weight1 + weight2)
+    if (Math.abs(move1) > 1) {
+      let move = computePos(sNode, pos1, pos2, move1)
+      if (move) {
+        res = true
+      }
+    }
+    if (Math.abs(move2) > 1) {
+      let move = computePos(eNode, pos2, pos1, move2)
+      if (move) {
+        res = move
+      }
+    }
+  }
+  console.log(res)
+  return res
+}
+function computePos(node, pos1, pos2, move) {
+  if (!node.fixed) {
+    let point = getPointByDistance(pos1, pos2, move / 2)
+    let forceAxis = node.forceAxis
+    if (forceAxis === 'y') {
+      point[0] = node.pos[0]
+    } else if (forceAxis === 'x') {
+      point[1] = node.pos[1]
+    }
+    node.pos = point
+    return true
+  }
+}
+function pullNode(sNode, eNode, startForceLink, endForceLink) {
+  let dis1 = sNode.forceDistance
+  let dis2 = eNode.forceDistance
+  let pos1 = sNode.attr('pos')
+  let pos2 = eNode.attr('pos')
+  let currentDis = getDistansceByPoints(pos1, pos2)
+  let targetDis = dis1 * startForceLink[1] + dis2 * endForceLink[1]
+  //判断是否有动画
+  if (currentDis === 0) {
+    //如果距离为0，随机一个距离
+    let pos = [pos1[0] + Math.random() - 0.5, pos1[1] + Math.random() - 0.5]
+    sNode.attr({ pos: pos })
   } else if (currentDis > targetDis + 1) {
     return moveNode(sNode, eNode, currentDis, targetDis)
   }
 }
-function pushNode(sNode, eNode, sfl, efl) {
+function pushNode(sNode, eNode, startForceLink, endForceLink) {
   //node 力的处理 开始节点，结束节点，开始的forceLink，结束节点的forceLink
   let dis1 = sNode.forceDistance
   let dis2 = eNode.forceDistance
-  let pos1 = sNode.container.attr('pos')
-  let pos2 = eNode.container.attr('pos')
+  let pos1 = sNode.__attrs.pos
+  let pos2 = eNode.__attrs.pos
   let currentDis = getDistansceByPoints(pos1, pos2)
   //弹力的处理分支
-  let targetDis = dis1 * sfl[0] + dis2 * efl[0]
+  let targetDis = dis1 * startForceLink[0] + dis2 * endForceLink[0]
   if (currentDis === 0) {
     //如果距离为0，随机一个距离
     pos2 = [pos1[0] + Math.random() - 0.5, pos1[1] + Math.random() - 0.5]
@@ -189,10 +329,10 @@ function pushNode(sNode, eNode, sfl, efl) {
 }
 function moveNode(sNode, eNode, currentDis, targetDis) {
   let res = false
-  let pos1 = sNode.container.attr('pos')
-  let pos2 = eNode.container.attr('pos')
-  let weight1 = sNode.attr('weight')
-  let weight2 = eNode.attr('weight')
+  let pos1 = sNode.__attrs.pos
+  let pos2 = eNode.__attrs.pos
+  let weight1 = sNode.__attrs.weight
+  let weight2 = eNode.__attrs.weight
   let diffDis = currentDis - targetDis
   // 如果目标距离比当前距离大，则两个node需要被弹开
   if (sNode.__dragging || eNode.__dragging) {
