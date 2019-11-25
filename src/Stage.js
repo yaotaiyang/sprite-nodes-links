@@ -11,7 +11,8 @@ class Stage extends Base {
     let defaultAttrs = {
       selector: '',
       size: [600, 400],
-      zoom: [0.5, 2]
+      zoom: [0.5, 2],
+      animation: false
     }
     let thisAttrs = Object.assign(defaultAttrs, attrs)
     this.attr(thisAttrs)
@@ -24,6 +25,7 @@ class Stage extends Base {
     this.links = []
     this.tick = new Ticks() //循环函数
     this.containers = [this.container]
+    this.animation = thisAttrs.animation
     this.layers = Object.create(null)
     this.layers['default'] = scene.layer('default')
     scene.delegateEvent('mousewheel', document)
@@ -106,22 +108,33 @@ function tick(start) {
   let nodes = this.nodes
   let links = this.links
   let nodesAttr = this.nodes.map(node => {
-    return { ...filterClone(node.__attrs), ...filterClone(node, ['renderBox', '__dragging', 'sizeBox', 'forceDistance']) }
+    return { ...filterClone(node.__attrs), __pos: node.__attrs.pos, ...filterClone(node, ['renderBox', '__dragging', 'sizeBox', 'forceDistance']) }
   })
   let linksAttr = links.map(link => link.__attrs)
   let animate = true
-  if (start) {
+  if (start && !this.animation) {
     computeResult(nodesAttr, linksAttr)
+    nodes.forEach(node => {
+      let attr = nodesAttr.filter(attr => attr.id === node.__attrs.id)
+      if (attr && attr.length) {
+        node.attr({ pos: attr[0].pos })
+      }
+    })
     animate = false
   } else {
     animate = computeForce(nodesAttr, linksAttr)
+    nodesAttr.forEach(node => {
+      if (node.__pos) {
+        node.pos = node.__pos
+      }
+    })
+    nodes.forEach(node => {
+      let attr = nodesAttr.filter(attr => attr.id === node.__attrs.id)
+      if (attr && attr.length) {
+        node.attr({ pos: attr[0].pos })
+      }
+    })
   }
-  nodes.forEach(node => {
-    let attr = nodesAttr.filter(attr => attr.id === node.__attrs.id)
-    if (attr && attr.length) {
-      attr = node.attr({ pos: attr[0].pos })
-    }
-  })
   if (!animate) {
     //如果没有动画在执行，tick函数清空
     this.dispatchEvent('animateComplete', extendsObject(null))
@@ -131,9 +144,13 @@ function tick(start) {
 let loop = 0
 function computeResult(nodes, links) {
   let ani = computeForce(nodes, links)
-  if (ani && loop < 500) {
-    console.log('next')
+  if (ani && loop < 1000) {
     loop++
+    nodes.forEach(node => {
+      if (node.__pos) {
+        node.pos = node.__pos
+      }
+    })
     computeResult(nodes, links)
   }
 }
@@ -180,36 +197,32 @@ function computeForce(nodes, links) {
   return pull || push
 }
 function computePull(sNode, eNode, startForceLink, endForceLink) {
-  let { forceDistance: dis1, pos: pos1 } = sNode
-  let { forceDistance: dis2, pos: pos2 } = eNode
+  let { forceDistance: dis1, __pos: pos1 } = sNode
+  let { forceDistance: dis2, __pos: pos2 } = eNode
   let currentDis = getDistansceByPoints(pos1, pos2)
   let targetDis = dis1 * startForceLink[1] + dis2 * endForceLink[1]
   //判断是否有动画
-  if (currentDis === 0) {
-    //如果距离为0，随机一个距离
-    let pos = [pos1[0] + Math.random() - 0.5, pos1[1] + Math.random() - 0.5]
-    sNode.pos = pos
-  } else if (currentDis > targetDis + 1) {
+  if (currentDis > targetDis + 1) {
     return computeMove(sNode, eNode, currentDis, targetDis)
   }
 }
 function computePush(sNode, eNode, startForceLink, endForceLink) {
-  let { forceDistance: dis1, pos: pos1 } = sNode
-  let { forceDistance: dis2, pos: pos2 } = eNode
+  let { forceDistance: dis1, __pos: pos1 } = sNode
+  let { forceDistance: dis2, __pos: pos2 } = eNode
   let currentDis = getDistansceByPoints(pos1, pos2)
   let targetDis = dis1 * startForceLink[0] + dis2 * endForceLink[0]
   if (currentDis === 0) {
     //如果距离为0，随机一个距离
-    let pos = [pos1[0] + Math.random() - 0.5, pos1[1] + Math.random() - 0.5]
-    sNode.pos = pos
-  } else if (currentDis < targetDis + 1) {
+    sNode.__pos = [pos1[0] + Math.random() - 0.5, pos1[1] + Math.random() - 0.5]
+    return true
+  } else if (currentDis < targetDis - 0.5) {
     return computeMove(sNode, eNode, currentDis, targetDis)
   }
 }
 function computeMove(sNode, eNode, currentDis, targetDis) {
   let res = false
-  let { pos: pos1, weight: weight1 } = sNode
-  let { pos: pos2, weight: weight2 } = eNode
+  let { __pos: pos1, weight: weight1 } = sNode
+  let { __pos: pos2, weight: weight2 } = eNode
   let diffDis = currentDis - targetDis
   // 如果目标距离比当前距离大，则两个node需要被弹开
   if (sNode.__dragging || eNode.__dragging) {
@@ -240,7 +253,7 @@ function computePos(node, pos1, pos2, move) {
     } else if (forceAxis === 'x') {
       point[1] = node.pos[1]
     }
-    node.pos = point
+    node.__pos = point
     return true
   }
 }
