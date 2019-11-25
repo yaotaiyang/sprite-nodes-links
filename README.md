@@ -2,7 +2,7 @@
 
 基于 spritejs 的节点链接基础库
 
-```
+```javascript
 import { Node, Stage, Link } from '../src/index'
 let stage = new Stage({
   selector: '#app'
