@@ -104,7 +104,7 @@ class Stage extends Base {
     this.container.clear()
   }
 }
-
+let loop = 0
 function tick(ani) {
   //tick函数
   let nodes = this.nodes
@@ -115,6 +115,7 @@ function tick(ani) {
   let linksAttr = links.map(link => link.__attrs)
   let animate = true
   if (!ani) {
+    loop = 0
     computeResult(nodesAttr, linksAttr)
     nodes.forEach(node => {
       let attr = nodesAttr.filter(attr => attr.id === node.__attrs.id)
@@ -143,10 +144,10 @@ function tick(ani) {
     this.tick.clear()
   }
 }
-let loop = 0
+
 function computeResult(nodes, links) {
   let ani = computeForce(nodes, links)
-  if (ani && loop < 1000) {
+  if (ani && loop < 5000) {
     loop++
     nodes.forEach(node => {
       if (node.__pos) {
@@ -204,7 +205,7 @@ function computePull(sNode, eNode, startForceLink, endForceLink) {
   let currentDis = getDistansceByPoints(pos1, pos2)
   let targetDis = dis1 * startForceLink[1] + dis2 * endForceLink[1]
   //判断是否有动画
-  if (currentDis > targetDis + 1) {
+  if (currentDis > targetDis + 0.5) {
     return computeMove(sNode, eNode, currentDis, targetDis)
   }
 }
