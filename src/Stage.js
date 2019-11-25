@@ -147,7 +147,7 @@ function tick(ani) {
 
 function computeResult(nodes, links) {
   let ani = computeForce(nodes, links)
-  if (ani && loop < 5000) {
+  if (ani && loop < 1000) {
     loop++
     nodes.forEach(node => {
       if (node.__pos) {
