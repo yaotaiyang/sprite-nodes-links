@@ -18,3 +18,5 @@ stage.append([node1, node2, node3, node4, link1, link2, link3])
 stage.checkForceLink(false) //校验弹性影响，不带动画
 console.log(stage)
 ```
+
+![sprite-mind](/node-links.png)
