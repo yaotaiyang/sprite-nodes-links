@@ -1,6 +1,6 @@
 {
   "name": "sprite-nodes-links",
-  "version": "0.0.13",
+  "version": "0.0.16",
   "description": "sprite-nodes-links",
   "main": "lib/index.js",
   "scripts": {
@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "@spritejs/shapes": "^1.1.7",
-    "filter-clone": "0.0.11",
+    "filter-clone": "^0.0.11",
     "sprite-draggable": "^0.1.19"
   },
   "devDependencies": {
