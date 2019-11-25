@@ -37,7 +37,7 @@ class Stage extends Base {
       })
     }
   }
-  append(sprite) {
+  append(sprite, forceLink) {
     if (sprite === undefined) return
     if (getType(sprite) === 'array') {
       sprite.forEach(sp => {
@@ -79,10 +79,12 @@ class Stage extends Base {
     }
     this.container.append(sprite.render())
     sprite.dispatchEvent('mounted', {})
-    this.checkForceLink(true)
     this.reSize()
+    if (forceLink) {
+      this.checkForceLink(true)
+    }
   }
-  checkForceLink(start) {
+  checkForceLink(ani) {
     let hasForce = false
     for (let i = 0; i < this.nodes.length; i++) {
       let forceLink = this.nodes[i].attr('forceLink')
@@ -93,7 +95,7 @@ class Stage extends Base {
     }
     if (hasForce) {
       this.tick.clear()
-      this.tick.add(tick.bind(this, start))
+      this.tick.add(tick.bind(this, ani))
     }
   }
   clear() {
@@ -103,7 +105,7 @@ class Stage extends Base {
   }
 }
 
-function tick(start) {
+function tick(ani) {
   //tick函数
   let nodes = this.nodes
   let links = this.links
@@ -112,7 +114,7 @@ function tick(start) {
   })
   let linksAttr = links.map(link => link.__attrs)
   let animate = true
-  if (start && !this.animation) {
+  if (!ani) {
     computeResult(nodesAttr, linksAttr)
     nodes.forEach(node => {
       let attr = nodesAttr.filter(attr => attr.id === node.__attrs.id)

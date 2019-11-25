@@ -1,6 +1,6 @@
 {
   "name": "sprite-nodes-links",
-  "version": "0.0.14",
+  "version": "0.0.15",
   "description": "sprite-nodes-links",
   "main": "lib/index.js",
   "scripts": {
