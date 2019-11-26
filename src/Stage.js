@@ -105,6 +105,7 @@ class Stage extends Base {
   }
 }
 let loop = 0
+let tickLoop = 0
 function tick(ani) {
   //tick函数
   let nodes = this.nodes
@@ -138,16 +139,18 @@ function tick(ani) {
       }
     })
   }
-  if (!animate) {
-    //如果没有动画在执行，tick函数清空
+  tickLoop++
+  if (!animate && !(ani && tickLoop <= 50)) {
+    //最少循环50次check位置，防止位置过小计算不充分如果没有动画在执行，tick函数清空
     this.dispatchEvent('animateComplete', extendsObject(null))
+    tickLoop = 0
     this.tick.clear()
   }
 }
-
 function computeResult(nodes, links) {
   let ani = computeForce(nodes, links)
-  if (ani && loop < 1000) {
+  //最少计算50次，最多计算1000次
+  if (loop <= 50 || (ani && loop < 1000)) {
     loop++
     nodes.forEach(node => {
       if (node.__pos) {
@@ -205,7 +208,7 @@ function computePull(sNode, eNode, startForceLink, endForceLink) {
   let currentDis = getDistansceByPoints(pos1, pos2)
   let targetDis = dis1 * startForceLink[1] + dis2 * endForceLink[1]
   //判断是否有动画
-  if (currentDis > targetDis + 0.5) {
+  if (currentDis > targetDis + 0.01) {
     return computeMove(sNode, eNode, currentDis, targetDis)
   }
 }
@@ -218,7 +221,7 @@ function computePush(sNode, eNode, startForceLink, endForceLink) {
     //如果距离为0，随机一个距离
     sNode.__pos = [pos1[0] + Math.random() - 0.5, pos1[1] + Math.random() - 0.5]
     return true
-  } else if (currentDis < targetDis - 0.5) {
+  } else if (currentDis < targetDis - 0.01) {
     return computeMove(sNode, eNode, currentDis, targetDis)
   }
 }

@@ -1,8 +1,9 @@
 {
   "name": "sprite-nodes-links",
-  "version": "0.0.16",
+  "version": "0.0.18",
   "description": "sprite-nodes-links",
   "main": "lib/index.js",
+  "module": "src/index.js",
   "scripts": {
     "build": "rimraf lib && webpack --config webpack.production.js",
     "start": "webpack-dev-server --config webpack.development.js",
