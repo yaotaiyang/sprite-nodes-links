@@ -12,7 +12,8 @@ class Stage extends Base {
       selector: '',
       size: [600, 400],
       zoom: [0.5, 2],
-      animation: false
+      forceLink: false,
+      layout:[]
     }
     let thisAttrs = Object.assign(defaultAttrs, attrs)
     this.attr(thisAttrs)
@@ -25,7 +26,6 @@ class Stage extends Base {
     this.links = []
     this.tick = new Ticks() //循环函数
     this.containers = [this.container]
-    this.animation = thisAttrs.animation
     this.layers = Object.create(null)
     this.layers['default'] = scene.layer('default')
     scene.delegateEvent('mousewheel', document)
@@ -37,7 +37,7 @@ class Stage extends Base {
       })
     }
   }
-  append(sprite, forceLink) {
+  append(sprite) {
     if (sprite === undefined) return
     if (getType(sprite) === 'array') {
       sprite.forEach(sp => {
@@ -80,22 +80,22 @@ class Stage extends Base {
     this.container.append(sprite.render())
     sprite.dispatchEvent('mounted', {})
     this.reSize()
-    if (forceLink) {
-      this.checkForceLink(true)
-    }
   }
   checkForceLink(ani) {
-    let hasForce = false
-    for (let i = 0; i < this.nodes.length; i++) {
-      let forceLink = this.nodes[i].attr('forceLink')
-      if (forceLink && forceLink.length > 0) {
-        hasForce = true
-        break
+    let forceLink = this.attr('forceLink')
+    if (forceLink) {
+      let hasForce = false
+      for (let i = 0; i < this.nodes.length; i++) {
+        let forceLink = this.nodes[i].attr('forceLink')
+        if (forceLink && forceLink.length > 0) {
+          hasForce = true
+          break
+        }
       }
-    }
-    if (hasForce) {
-      this.tick.clear()
-      this.tick.add(tick.bind(this, ani))
+      if (hasForce) {
+        this.tick.clear()
+        this.tick.add(tick.bind(this, ani))
+      }
     }
   }
   clear() {
