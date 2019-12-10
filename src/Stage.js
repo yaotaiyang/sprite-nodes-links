@@ -10,18 +10,22 @@ class Stage extends Base {
     super(attrs)
     let defaultAttrs = {
       selector: '',
-      size: [600, 400],
       zoom: [0.5, 2],
       forceLink: false,
-      layout:[]
+      layout: []
     }
+
     let thisAttrs = Object.assign(defaultAttrs, attrs)
     this.attr(thisAttrs)
     let { selector, size } = thisAttrs
-    let scene = new Scene(selector, {
-      viewport: size,
+    let $dom = selector
+    if (typeof selector === 'string') {
+      $dom = document.querySelector(selector)
+    }
+    let scene = new Scene($dom, {
       displayRatio: 'auto'
     })
+    this.scene = scene
     this.nodes = []
     this.links = []
     this.tick = new Ticks() //循环函数
@@ -36,6 +40,11 @@ class Stage extends Base {
         zoom.call(this, container.layer, container)
       })
     }
+    window.addEventListener('resize', function() {
+      let { height: h, width: w } = $dom.getBoundingClientRect()
+      scene.setViewport(w, h)
+      scene.setResolution(w, h)
+    })
   }
   append(sprite) {
     if (sprite === undefined) return
