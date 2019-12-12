@@ -41,13 +41,39 @@ class Stage extends Base {
         zoom.call(this, container.layer, container)
       })
     }
-    window.addEventListener('resize', this.resize.bind(this))
+    window.addEventListener('resize', this.reLayout.bind(this))
   }
-  resize() {
+  reLayout() {
     let { height: h, width: w } = this.$dom.getBoundingClientRect()
     this.scene.setViewport(w, h)
     this.scene.setResolution(w, h)
     return this
+  }
+  reSize() {
+    let container = this.container
+    let [xMin, yMin, xMax, yMax] = [0, 0, 0, 0]
+    if (container.layer) {
+      //取最大值来进行比较
+      xMin = container.layer.viewport[0]
+      yMin = container.layer.viewport[1]
+    }
+    this.renderBox = container.renderBox
+    let [oX, oY] = this.renderBox
+    if (this.nodes.length > 0) {
+      this.nodes.forEach(sprite => {
+        if (sprite.attr('layout') !== false) {
+          //如果layout为false 不参数计算布局
+          sprite.reSize()
+          const renderBox = sprite.renderBox
+          xMin = Math.min(xMin, renderBox[0])
+          yMin = Math.min(yMin, renderBox[1])
+          xMax = Math.max(xMax, renderBox[2])
+          yMax = Math.max(yMax, renderBox[3])
+        }
+      })
+    }
+    this.sizeBox = [xMin, yMin, xMax, yMax]
+    this.renderBox = [oX + xMin, oY + yMin, oX + xMax, oY + yMax]
   }
   append(sprite) {
     if (sprite === undefined) return
@@ -157,6 +183,7 @@ function tick(ani) {
     this.dispatchEvent('animateComplete', extendsObject(null))
     tickLoop = 0
     this.tick.clear()
+    this.reSize()
   }
 }
 function computeResult(nodes, links) {
