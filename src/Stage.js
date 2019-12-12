@@ -321,6 +321,7 @@ function zoom(layer, group) {
       let dx = e.offsetX - oX
       let dy = e.offsetY - oY
       group.transition(0).attr({ pos: [startX + dx, startY + dy] })
+      this.reSize()
     }
   })
   layer.on('mouseup', e => {

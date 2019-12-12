@@ -20,6 +20,7 @@ class Base extends BaseNode {
     // 拖动的时候，修改renderBox
     this.on('drag', () => {
       const [oX, oY] = this.container.renderBox
+      console.log('renderbox----')
       this.renderBox = [oX + this.sizeBox[0], oY + this.sizeBox[1], oX + this.sizeBox[2], oY + this.sizeBox[3]]
     })
   }
