@@ -26,6 +26,7 @@ class Stage extends Base {
       displayRatio: 'auto'
     })
     this.scene = scene
+    this.$dom = $dom
     this.nodes = []
     this.links = []
     this.tick = new Ticks() //循环函数
@@ -40,11 +41,13 @@ class Stage extends Base {
         zoom.call(this, container.layer, container)
       })
     }
-    window.addEventListener('resize', function() {
-      let { height: h, width: w } = $dom.getBoundingClientRect()
-      scene.setViewport(w, h)
-      scene.setResolution(w, h)
-    })
+    window.addEventListener('resize', this.resize.bind(this))
+  }
+  resize() {
+    let { height: h, width: w } = this.$dom.getBoundingClientRect()
+    this.scene.setViewport(w, h)
+    this.scene.setResolution(w, h)
+    return this
   }
   append(sprite) {
     if (sprite === undefined) return
