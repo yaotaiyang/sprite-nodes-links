@@ -78,11 +78,14 @@ class Base extends BaseNode {
     let [oX, oY] = this.renderBox
     if (container.children.length > 0) {
       container.children.forEach(sprite => {
-        const renderBox = sprite.renderBox
-        xMin = Math.min(xMin, renderBox[0])
-        yMin = Math.min(yMin, renderBox[1])
-        xMax = Math.max(xMax, renderBox[2])
-        yMax = Math.max(yMax, renderBox[3])
+        if (sprite.attr('layout') !== false) {
+          //如果layout为false 不参数计算布局
+          const renderBox = sprite.renderBox
+          xMin = Math.min(xMin, renderBox[0])
+          yMin = Math.min(yMin, renderBox[1])
+          xMax = Math.max(xMax, renderBox[2])
+          yMax = Math.max(yMax, renderBox[3])
+        }
       })
     }
     this.sizeBox = [xMin, yMin, xMax, yMax]
