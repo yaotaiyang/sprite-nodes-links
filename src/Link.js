@@ -13,11 +13,9 @@ class Link extends Base {
   }
   move() {
     let { startId, endId } = this.attr()
-    let startNode = this.stage.nodes.filter(node => node.attr('id') === startId)
-    let endNode = this.stage.nodes.filter(node => node.attr('id') === endId)
+    let startNode = this.stage.nodes.filter(node => node.attr('id') === startId)[0]
+    let endNode = this.stage.nodes.filter(node => node.attr('id') === endId)[0]
     if (startNode && endNode) {
-      startNode = startNode[0]
-      endNode = endNode[0]
       let startPoint = startNode.container.attr('pos')
       let endPoint = endNode.container.attr('pos')
       if (this.$line) {
