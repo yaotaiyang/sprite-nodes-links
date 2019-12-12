@@ -74,6 +74,11 @@ class Base extends BaseNode {
   reSize() {
     let container = this.container
     let [xMin, yMin, xMax, yMax] = [0, 0, 0, 0]
+    if (container.layer) {
+      //取最大值来进行比较
+      xMin = container.layer.viewport[0]
+      yMin = container.layer.viewport[1]
+    }
     this.renderBox = container.renderBox
     let [oX, oY] = this.renderBox
     if (container.children.length > 0) {
