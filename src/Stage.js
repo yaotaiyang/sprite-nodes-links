@@ -33,11 +33,6 @@ class Stage extends Base {
     this.containers = [this.container]
     this.layers = Object.create(null)
     this.layers['default'] = scene.layer('default')
-    this.layers['default'].on('mouseleave', _ => {
-      this.nodes.forEach(node => {
-        node.dispatchEvent('dragend', {})
-      })
-    })
     scene.delegateEvent('mousewheel', document)
     scene.delegateEvent('contextmenu', document)
     this.layers.default.append(this.container)
