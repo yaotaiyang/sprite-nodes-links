@@ -330,6 +330,9 @@ function zoom(layer, group) {
       this.reSize()
     }
   })
+  layer.on('mouseleave', e => {
+    draged = false
+  })
   layer.on('mouseup', e => {
     draged = false
   })
