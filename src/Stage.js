@@ -37,7 +37,6 @@ class Stage extends Base {
       this.nodes.forEach(node => {
         node.dispatchEvent('dragend', {})
       })
-      console.log('leave')
     })
     scene.delegateEvent('mousewheel', document)
     scene.delegateEvent('contextmenu', document)
