@@ -24,15 +24,15 @@ class Node extends Base {
     }
     let { pos } = thisAttrs
     this.container.attr({ pos, zIndex: 100 })
-    this.on('drag', e => {
+    this.addEventListener('drag', e => {
       this.__dragging = true
       this.attr('pos', this.container.attr('pos'))
       this.stage.checkForceLink(true)
     })
-    this.on('dragstart', e => {
+    this.addEventListener('dragstart', e => {
       this.container.attr({ zIndex: 110 })
     })
-    this.on('dragend', e => {
+    this.addEventListener('dragend', e => {
       this.stage.nodes.forEach(node => {
         if (node === this) {
           this.container.attr({ zIndex: 101 })
@@ -74,7 +74,7 @@ class Node extends Base {
     let txt = this.attr('text')
     let label = new Label(txt)
     label.attr({
-      border: { color: '#ccc', width: 1, style: 'solid' },
+      border: [1, '#ccc'],
       padding: [2, 6],
       bgcolor: '#fff',
       borderRadius: [5],

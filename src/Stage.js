@@ -22,9 +22,7 @@ class Stage extends Base {
     if (typeof selector === 'string') {
       $dom = document.querySelector(selector)
     }
-    let scene = new Scene($dom, {
-      displayRatio: 'auto'
-    })
+    let scene = new Scene({ container: $dom, displayRatio: window.devicePixelRatio })
     this.scene = scene
     this.$dom = $dom
     this.nodes = []
@@ -33,8 +31,8 @@ class Stage extends Base {
     this.containers = [this.container]
     this.layers = Object.create(null)
     this.layers['default'] = scene.layer('default')
-    scene.delegateEvent('mousewheel', document)
-    scene.delegateEvent('contextmenu', document)
+    // scene.delegateEvent('mousewheel', document)
+    // scene.delegateEvent('contextmenu', document)
     this.layers.default.append(this.container)
     if (this.attr('zoom') !== false) {
       this.containers.forEach(container => {
@@ -54,10 +52,11 @@ class Stage extends Base {
     let [xMin, yMin, xMax, yMax] = [0, 0, 0, 0]
     if (container.layer) {
       //取最大值来进行比较
-      xMin = container.layer.viewport[0]
-      yMin = container.layer.viewport[1]
+      let { width, height } = container.layer.getResolution
+      xMin = width / container.layer.displayRatio
+      yMin = height / container.layer.displayRatio
     }
-    this.renderBox = container.renderBox
+    this.renderBox = container.renderBox || [0, 0, 0, 0]
     let [oX, oY] = this.renderBox
     if (this.nodes.length > 0) {
       this.nodes.forEach(sprite => {
@@ -116,8 +115,10 @@ class Stage extends Base {
       links.push(sprite)
     }
     this.container.append(sprite.render())
-    sprite.dispatchEvent('mounted', {})
-    this.reSize()
+    setTimeout(_ => {
+      sprite.dispatchEvent('mounted', {})
+      this.reSize()
+    })
   }
   checkForceLink(ani) {
     let forceLink = this.attr('forceLink')
@@ -307,30 +308,30 @@ function zoom(layer, group) {
   let oX, oY
   let startX, startY
   let draged = false
-  layer.on('mousedown', e => {
+  layer.addEventListener('mousedown', e => {
     if (e.originalEvent.which === 3) {
       return
     }
-    oX = e.offsetX
-    oY = e.offsetY
+    oX = e.x
+    oY = e.y
     ;[startX, startY] = group.attr('pos')
     draged = true
   })
-  layer.on('mousemove', e => {
+  layer.addEventListener('mousemove', e => {
     if (draged) {
-      let dx = e.offsetX - oX
-      let dy = e.offsetY - oY
+      let dx = e.x - oX
+      let dy = e.y - oY
       group.transition(0).attr({ pos: [startX + dx, startY + dy] })
       this.reSize()
     }
   })
-  layer.on('mouseleave', e => {
+  layer.addEventListener('mouseleave', e => {
     draged = false
   })
-  layer.on('mouseup', e => {
+  layer.addEventListener('mouseup', e => {
     draged = false
   })
-  layer.on('mousewheel', e => {
+  layer.addEventListener('mousewheel', e => {
     e.preventDefault()
     const [scaleX] = group.attr('scale')
     let [w, h] = group.attr('size')

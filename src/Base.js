@@ -1,7 +1,12 @@
-import { Group, BaseNode } from 'spritejs'
+import { Group, Node } from 'spritejs'
 import { getType, extendsObject } from './utils'
-import { draggable } from 'sprite-draggable'
-class Base extends BaseNode {
+import { draggable } from 'next-draggable'
+Node.prototype.clear = function() {
+  this.children.forEach(child => {
+    child.remove()
+  })
+}
+class Base extends Node {
   constructor(attrs) {
     super()
     this.attr(attrs)
@@ -12,14 +17,14 @@ class Base extends BaseNode {
     this.container.attr({ size: [0.1, 0.1], clipOverflow: false }) // 将group设置成非常小，不影响其他dom，并且不clip内部元素
     ;['dragstart', 'drag', 'dragend', 'dragover', 'dragenter', 'dragleave', 'drop', 'click', 'dblclick', 'mouseenter', 'mouseleave', 'mousemove', 'mousedown', 'contextmenu'].forEach(evt => {
       // 透传container上的事件
-      this.container.on(evt, e => {
+      this.container.addEventListener(evt, e => {
         this.dispatchEvent(evt, e)
       })
     })
-    this.on('mounted', this.mounted)
+    this.addEventListener('mounted', this.mounted)
     // 拖动的时候，修改renderBox
-    this.on('drag', () => {
-      const [oX, oY] = this.container.renderBox
+    this.addEventListener('drag', () => {
+      const [oX, oY] = this.container.originalClientRect
       this.renderBox = [oX + this.sizeBox[0], oY + this.sizeBox[1], oX + this.sizeBox[2], oY + this.sizeBox[3]]
     })
   }
@@ -76,16 +81,18 @@ class Base extends BaseNode {
     let [xMin, yMin, xMax, yMax] = [0, 0, 0, 0]
     if (container.layer) {
       //取最大值来进行比较
-      xMin = container.layer.viewport[0]
-      yMin = container.layer.viewport[1]
+      let { width, height } = container.layer.getResolution()
+
+      xMin = width / container.layer.displayRatio
+      yMin = height / container.layer.displayRatio
     }
-    this.renderBox = container.renderBox
+    this.renderBox = container.originalClientRect
     let [oX, oY] = this.renderBox
     if (container.children.length > 0) {
       container.children.forEach(sprite => {
         if (sprite.attr('layout') !== false) {
           //如果layout为false 不参数计算布局
-          const renderBox = sprite.renderBox
+          const renderBox = sprite.renderBox || [0, 0, 0, 0]
           xMin = Math.min(xMin, renderBox[0])
           yMin = Math.min(yMin, renderBox[1])
           xMax = Math.max(xMax, renderBox[2])
