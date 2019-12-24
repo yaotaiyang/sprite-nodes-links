@@ -75,6 +75,8 @@ class Node extends Base {
     let label = new Label(txt)
     label.attr({
       border: [1, '#ccc'],
+      fontFamily: 'Arial',
+      fontSize: 14,
       padding: [2, 6],
       bgcolor: '#fff',
       borderRadius: [5],
