@@ -113,7 +113,6 @@ class Stage extends Base {
     this.container.append(sprite.render())
     setTimeout(_ => {
       sprite.dispatchEvent('mounted', {})
-      this.reSize()
     })
   }
   checkForceLink(ani) {

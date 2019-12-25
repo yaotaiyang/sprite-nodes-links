@@ -100,7 +100,6 @@ class Base extends Node {
     }
     this.sizeBox = [xMin, yMin, xMax, yMax]
     this.renderBox = [oX + xMin, oY + yMin, oX + xMax, oY + yMax]
-    console.log(this.sizeBox, this.renderBox)
   }
 }
 export default Base
