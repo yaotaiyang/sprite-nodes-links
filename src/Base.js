@@ -24,7 +24,7 @@ class Base extends Node {
     this.addEventListener('mounted', this.mounted)
     // 拖动的时候，修改renderBox
     this.addEventListener('drag', () => {
-      const [oX, oY] = this.container.originalClientRect
+      const [oX, oY] = this.container.attr('pos')
       this.renderBox = [oX + this.sizeBox[0], oY + this.sizeBox[1], oX + this.sizeBox[2], oY + this.sizeBox[3]]
     })
   }
@@ -82,26 +82,25 @@ class Base extends Node {
     if (container.layer) {
       //取最大值来进行比较
       let { width, height } = container.layer.getResolution()
-
       xMin = width / container.layer.displayRatio
       yMin = height / container.layer.displayRatio
     }
-    this.renderBox = container.originalClientRect
-    let [oX, oY] = this.renderBox
+    let [oX, oY] = this.container.attr('pos')
     if (container.children.length > 0) {
       container.children.forEach(sprite => {
         if (sprite.attr('layout') !== false) {
           //如果layout为false 不参数计算布局
-          const renderBox = sprite.renderBox || [0, 0, 0, 0]
-          xMin = Math.min(xMin, renderBox[0])
-          yMin = Math.min(yMin, renderBox[1])
-          xMax = Math.max(xMax, renderBox[2])
-          yMax = Math.max(yMax, renderBox[3])
+          const [left, top, width, height] = sprite.originalClientRect
+          xMin = Math.min(xMin, left)
+          yMin = Math.min(yMin, top)
+          xMax = Math.max(xMax, left + width)
+          yMax = Math.max(yMax, top + height)
         }
       })
     }
     this.sizeBox = [xMin, yMin, xMax, yMax]
     this.renderBox = [oX + xMin, oY + yMin, oX + xMax, oY + yMax]
+    console.log(this.sizeBox, this.renderBox)
   }
 }
 export default Base

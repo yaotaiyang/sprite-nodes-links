@@ -31,8 +31,6 @@ class Stage extends Base {
     this.containers = [this.container]
     this.layers = Object.create(null)
     this.layers['default'] = scene.layer('default')
-    // scene.delegateEvent('mousewheel', document)
-    // scene.delegateEvent('contextmenu', document)
     this.layers.default.append(this.container)
     if (this.attr('zoom') !== false) {
       this.containers.forEach(container => {
@@ -52,22 +50,20 @@ class Stage extends Base {
     let [xMin, yMin, xMax, yMax] = [0, 0, 0, 0]
     if (container.layer) {
       //取最大值来进行比较
-      let { width, height } = container.layer.getResolution
+      let { width, height } = container.layer.getResolution()
       xMin = width / container.layer.displayRatio
       yMin = height / container.layer.displayRatio
     }
-    this.renderBox = container.renderBox || [0, 0, 0, 0]
-    let [oX, oY] = this.renderBox
+    let [oX, oY] = this.container.attr('pos')
     if (this.nodes.length > 0) {
       this.nodes.forEach(sprite => {
         if (sprite.attr('layout') !== false) {
           //如果layout为false 不参数计算布局
-          sprite.reSize()
-          const renderBox = sprite.renderBox
-          xMin = Math.min(xMin, renderBox[0])
-          yMin = Math.min(yMin, renderBox[1])
-          xMax = Math.max(xMax, renderBox[2])
-          yMax = Math.max(yMax, renderBox[3])
+          const [left, top, width, height] = sprite.renderBox
+          xMin = Math.min(xMin, left)
+          yMin = Math.min(yMin, top)
+          xMax = Math.max(xMax, left + width)
+          yMax = Math.max(yMax, top + height)
         }
       })
     }

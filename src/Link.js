@@ -8,6 +8,7 @@ class Link extends Base {
   }
   draw() {
     this.$line = new Polyline()
+    this.$line.attr({ lineWidth: 1, strokeColor: '#000' })
     this.append(this.$line)
     this.move()
   }

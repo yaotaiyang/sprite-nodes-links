@@ -82,6 +82,7 @@ class Node extends Base {
       borderRadius: [5],
       anchor: [0.5]
     })
+    this.$label = label
     this.append(label)
   }
   mounted() {
