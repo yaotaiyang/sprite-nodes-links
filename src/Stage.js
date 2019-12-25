@@ -40,9 +40,7 @@ class Stage extends Base {
     window.addEventListener('resize', this.reLayout.bind(this))
   }
   reLayout() {
-    let { height: h, width: w } = this.$dom.getBoundingClientRect()
-    this.scene.setViewport(w, h)
-    this.scene.setResolution(w, h)
+    this.scene.setResolution()
     return this
   }
   reSize() {

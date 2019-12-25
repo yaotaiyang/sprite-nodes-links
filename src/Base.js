@@ -2,9 +2,10 @@ import { Group, Node } from 'spritejs'
 import { getType, extendsObject } from './utils'
 import { draggable } from 'next-draggable'
 Node.prototype.clear = function() {
-  this.children.forEach(child => {
-    child.remove()
-  })
+  for (let i = 0; i < this.children.length; i++) {
+    this.children[i].remove()
+    i--
+  }
 }
 class Base extends Node {
   constructor(attrs) {
@@ -40,7 +41,7 @@ class Base extends Node {
       this.container.append(sprites)
     }
   }
-  /* 保持与spritejs 接口统一,拦截BaseNode attr */
+  /* 保持与spritejs 接口统一,拦截Node attr */
   attr(name, value) {
     let oldAttr = extendsObject({}, this.__attrs)
     if (name === undefined && value === undefined) {
