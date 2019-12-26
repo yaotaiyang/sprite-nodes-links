@@ -60,7 +60,7 @@ class Stage extends Base {
           this.tick.add(tick.bind(this, this.__forceAni))
         }
       }
-    }, 0)
+    }, 16)
     window.addEventListener('resize', this.reLayout.bind(this))
   }
   reLayout() {
@@ -139,23 +139,6 @@ class Stage extends Base {
     sprite.dispatchEvent('mounted', {})
     this.reSize()
   }
-  // checkForceLink(ani) {
-  //   let forceLink = this.attr('forceLink')
-  //   if (forceLink) {
-  //     let hasForce = false
-  //     for (let i = 0; i < this.nodes.length; i++) {
-  //       let forceLink = this.nodes[i].attr('forceLink')
-  //       if (forceLink && forceLink.length > 0) {
-  //         hasForce = true
-  //         break
-  //       }
-  //     }
-  //     if (hasForce) {
-  //       this.tick.clear()
-  //       this.tick.add(tick.bind(this, ani))
-  //     }
-  //   }
-  // }
   clear() {
     this.steps = []
     this.links = []
