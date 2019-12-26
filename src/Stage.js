@@ -2,7 +2,7 @@ import Base from './Base'
 import { Scene } from 'spritejs'
 import Node from './Node'
 import Link from './Link'
-import { getType, getDistansceByPoints, getPointByDistance, extendsObject } from './utils'
+import { getType, getDistansceByPoints, getPointByDistance, extendsObject, throttle } from './utils'
 import Ticks from './Ticks'
 import filterClone from 'filter-clone'
 class Stage extends Base {
@@ -41,6 +41,26 @@ class Stage extends Base {
         zoom.call(this, container.layer, container)
       })
     }
+    this.checkForceLink = throttle(ani => {
+      let forceLink = this.attr('forceLink')
+      if (getType(ani) === 'boolean') {
+        this.__forceAni = ani
+      }
+      if (forceLink) {
+        let hasForce = false
+        for (let i = 0; i < this.nodes.length; i++) {
+          let forceLink = this.nodes[i].attr('forceLink')
+          if (forceLink && forceLink.length > 0) {
+            hasForce = true
+            break
+          }
+        }
+        if (hasForce) {
+          this.tick.clear()
+          this.tick.add(tick.bind(this, this.__forceAni))
+        }
+      }
+    }, 0)
     window.addEventListener('resize', this.reLayout.bind(this))
   }
   reLayout() {
@@ -119,23 +139,23 @@ class Stage extends Base {
     sprite.dispatchEvent('mounted', {})
     this.reSize()
   }
-  checkForceLink(ani) {
-    let forceLink = this.attr('forceLink')
-    if (forceLink) {
-      let hasForce = false
-      for (let i = 0; i < this.nodes.length; i++) {
-        let forceLink = this.nodes[i].attr('forceLink')
-        if (forceLink && forceLink.length > 0) {
-          hasForce = true
-          break
-        }
-      }
-      if (hasForce) {
-        this.tick.clear()
-        this.tick.add(tick.bind(this, ani))
-      }
-    }
-  }
+  // checkForceLink(ani) {
+  //   let forceLink = this.attr('forceLink')
+  //   if (forceLink) {
+  //     let hasForce = false
+  //     for (let i = 0; i < this.nodes.length; i++) {
+  //       let forceLink = this.nodes[i].attr('forceLink')
+  //       if (forceLink && forceLink.length > 0) {
+  //         hasForce = true
+  //         break
+  //       }
+  //     }
+  //     if (hasForce) {
+  //       this.tick.clear()
+  //       this.tick.add(tick.bind(this, ani))
+  //     }
+  //   }
+  // }
   clear() {
     this.steps = []
     this.links = []
