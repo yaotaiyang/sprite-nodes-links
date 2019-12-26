@@ -33,6 +33,26 @@ function extendsObject(...args) {
   })
   return Object.assign(...cArgs)
 }
+function throttle(fn, interval = 500) {
+  let timer = null
+  let firstTime = true
+  return function(...args) {
+    if (firstTime) {
+      // 第一次加载
+      fn.apply(this, args)
+      return (firstTime = false)
+    }
+    if (timer) {
+      // 定时器正在执行中，跳过
+      return
+    }
+    timer = setTimeout(() => {
+      clearTimeout(timer)
+      timer = null
+      fn.apply(this, args)
+    }, interval)
+  }
+}
 function getPolygonIntersectionPoint(points, startPoint, endPoint, multi = false) {
   let arrRes = []
   for (let i = 0; i < points.length; i++) {
@@ -79,4 +99,4 @@ function getPointByDistance(point1, point2, distance) {
   const y = (distance * (y2 - y1)) / r + y1
   return [x, y]
 }
-export { guid, getType, extendsObject, getAngleByPoints, getDistansceByPoints, getPointByDistance, getPolygonIntersectionPoint }
+export { guid, getType, extendsObject, throttle, getAngleByPoints, getDistansceByPoints, getPointByDistance, getPolygonIntersectionPoint }

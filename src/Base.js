@@ -1,6 +1,7 @@
 import { Group, Node } from 'spritejs'
-import { getType, extendsObject } from './utils'
+import { getType } from './utils'
 import { draggable } from 'next-draggable'
+import filterClone from 'filter-clone'
 Node.prototype.clear = function() {
   for (let i = 0; i < this.children.length; i++) {
     this.children[i].remove()
@@ -13,7 +14,7 @@ class Base extends Node {
     this.attr(attrs)
     this.sizeBox = [0, 0, 0, 0] // 尺寸内部大小
     this.renderBox = [0, 0, 0, 0] // 坐标大小
-    this.__attrs = extendsObject(null)
+    this.__attrs = filterClone(null)
     this.container = new Group()
     this.container.attr({ size: [0.1, 0.1], clipOverflow: false }) // 将group设置成非常小，不影响其他dom，并且不clip内部元素
     ;['dragstart', 'drag', 'dragend', 'dragover', 'dragenter', 'dragleave', 'drop', 'click', 'dblclick', 'mouseenter', 'mouseleave', 'mousemove', 'mousedown', 'contextmenu'].forEach(evt => {
@@ -43,7 +44,6 @@ class Base extends Node {
   }
   /* 保持与spritejs 接口统一,拦截Node attr */
   attr(name, value) {
-    let oldAttr = extendsObject({}, this.__attrs)
     if (name === undefined && value === undefined) {
       // 获取全部属性 this.attr()
       return this.__attrs
@@ -52,12 +52,10 @@ class Base extends Node {
       return this.__attrs[name]
     } else if (getType(name) === 'object') {
       // 对象属性赋值 this.attr({'color':'#f00'})
-      this.__attrs = extendsObject(this.__attrs, name)
-      //this.attrUpdate(extendsObject(name), oldAttr)
+      this.__attrs = Object.assign(filterClone(this.__attrs || {}), name)
     } else if (getType(name) === 'string' && value !== undefined) {
       // 单一对象赋值 this.attr('color','#f00')
       this.__attrs[name] = value
-      //this.attrUpdate(extendsObject({ [name]: value }), oldAttr)
     }
   }
   draggable(option) {

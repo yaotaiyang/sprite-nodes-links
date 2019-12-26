@@ -20,7 +20,7 @@ class Node extends Base {
       this.attr('id', guid())
     }
     if (attrDrag !== false) {
-      //this.draggable()
+      this.draggable()
     }
     let { pos } = thisAttrs
     this.container.attr({ pos, zIndex: 100 })

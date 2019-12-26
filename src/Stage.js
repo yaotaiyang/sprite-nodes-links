@@ -2,7 +2,7 @@ import Base from './Base'
 import { Scene } from 'spritejs'
 import Node from './Node'
 import Link from './Link'
-import { getType, getDistansceByPoints, getPointByDistance, extendsObject } from './utils'
+import { getType, getDistansceByPoints, getPointByDistance, throttle } from './utils'
 import Ticks from './Ticks'
 import filterClone from 'filter-clone'
 class Stage extends Base {
@@ -28,10 +28,31 @@ class Stage extends Base {
     this.nodes = []
     this.links = []
     this.tick = new Ticks() //循环函数
+    this.__forceAni = false
     this.containers = [this.container]
     this.layers = Object.create(null)
     this.layers['default'] = scene.layer('default')
     this.layers.default.append(this.container)
+    this.checkForceLink = throttle(ani => {
+      let forceLink = this.attr('forceLink')
+      if (getType(ani) === 'boolean') {
+        this.__forceAni = ani
+      }
+      if (forceLink) {
+        let hasForce = false
+        for (let i = 0; i < this.nodes.length; i++) {
+          let forceLink = this.nodes[i].attr('forceLink')
+          if (forceLink && forceLink.length > 0) {
+            hasForce = true
+            break
+          }
+        }
+        if (hasForce) {
+          this.tick.clear()
+          this.tick.add(tick.bind(this, this.__forceAni))
+        }
+      }
+    }, 0)
     if (this.attr('zoom') !== false) {
       this.containers.forEach(container => {
         zoom.call(this, container.layer, container)
@@ -111,24 +132,8 @@ class Stage extends Base {
     this.container.append(sprite.render())
     setTimeout(_ => {
       sprite.dispatchEvent('mounted', {})
+      this.checkForceLink()
     })
-  }
-  checkForceLink(ani) {
-    let forceLink = this.attr('forceLink')
-    if (forceLink) {
-      let hasForce = false
-      for (let i = 0; i < this.nodes.length; i++) {
-        let forceLink = this.nodes[i].attr('forceLink')
-        if (forceLink && forceLink.length > 0) {
-          hasForce = true
-          break
-        }
-      }
-      if (hasForce) {
-        this.tick.clear()
-        this.tick.add(tick.bind(this, ani))
-      }
-    }
   }
   clear() {
     this.steps = []
@@ -174,7 +179,7 @@ function tick(ani) {
   tickLoop++
   if (!animate && !(ani && tickLoop <= 50)) {
     //最少循环50次check位置，防止位置过小计算不充分如果没有动画在执行，tick函数清空
-    this.dispatchEvent('animateComplete', extendsObject(null))
+    this.dispatchEvent('animateComplete', filterClone(null))
     tickLoop = 0
     this.tick.clear()
     this.reSize()
