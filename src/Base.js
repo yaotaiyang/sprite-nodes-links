@@ -87,7 +87,7 @@ class Base extends Node {
     let [oX, oY] = this.container.attr('pos')
     if (container.children.length > 0) {
       container.children.forEach(sprite => {
-        if (sprite.attr('layout') !== false) {
+        if (sprite.attr('layout') !== false && sprite.originalClientRect) {
           //如果layout为false 不参数计算布局
           const [left, top, width, height] = sprite.originalClientRect
           xMin = Math.min(xMin, left)
