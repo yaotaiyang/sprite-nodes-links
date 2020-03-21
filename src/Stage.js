@@ -168,17 +168,23 @@ function tick(ani) {
     animate = false
   } else {
     animate = computeForce(nodesAttr, linksAttr)
+    let needMove = false
     nodesAttr.forEach(node => {
-      if (node.__pos) {
+      if (node.__pos && getDistansceByPoints(node.pos, node.__pos) > 0.01) {
         node.pos = node.__pos
+        needMove = true
       }
     })
-    nodes.forEach(node => {
-      let attr = nodesAttr.filter(attr => attr.id === node.__attrs.id)
-      if (attr && attr.length) {
-        node.attr({ pos: attr[0].pos })
-      }
-    })
+    if (needMove) {
+      nodes.forEach(node => {
+        let attr = nodesAttr.filter(attr => attr.id === node.__attrs.id)
+        if (attr && attr.length) {
+          node.attr({ pos: attr[0].pos })
+        }
+      })
+    } else {
+      animate = false
+    }
   }
   tickLoop++
   if (!animate && !(ani && tickLoop <= 50)) {
