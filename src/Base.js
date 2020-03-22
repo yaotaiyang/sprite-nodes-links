@@ -16,8 +16,8 @@ class Base extends Node {
     this.renderBox = [0, 0, 0, 0] // 坐标大小
     this.__attrs = filterClone(null)
     this.container = new Group()
-    this.container.attr({ size: [0.1, 0.1], clipOverflow: false }) // 将group设置成非常小，不影响其他dom，并且不clip内部元素
-    ;['dragstart', 'drag', 'dragend', 'dragover', 'dragenter', 'dragleave', 'drop', 'click', 'dblclick', 'mouseenter', 'mouseleave', 'mousemove', 'mousedown', 'contextmenu'].forEach(evt => {
+    this.container.attr({ size: [0.1, 0.1] }) // 将group设置成非常小，不影响其他dom，并且不clip内部元素
+    ;['dragstart', 'drag', 'dragend', 'dragover', 'dragenter', 'dragleave', 'drop'].forEach(evt => {
       // 透传container上的事件
       this.container.addEventListener(evt, e => {
         this.dispatchEvent(evt, e)
@@ -29,6 +29,13 @@ class Base extends Node {
       const [oX, oY] = this.container.attr('pos')
       this.renderBox = [oX + this.sizeBox[0], oY + this.sizeBox[1], oX + this.sizeBox[2], oY + this.sizeBox[3]]
     })
+  }
+  addEventListener(type, func) {
+    super.addEventListener(type, func)
+    let eventList = ['click', 'dblclick', 'mouseenter', 'mouseleave', 'mousemove', 'mousedown', 'contextmenu']
+    if (eventList.indexOf(type) !== -1) {
+      this.container.addEventListener(type, func)
+    }
   }
   pointCollision() {
     return true
@@ -87,7 +94,7 @@ class Base extends Node {
     let [oX, oY] = this.container.attr('pos')
     if (container.children.length > 0) {
       container.children.forEach(sprite => {
-        if (sprite.attr('layout') !== false && sprite.originalClientRect) {
+        if (sprite.attr('layout') !== false && sprite.mesh) {
           //如果layout为false 不参数计算布局
           const [left, top, width, height] = sprite.originalClientRect
           xMin = Math.min(xMin, left)
