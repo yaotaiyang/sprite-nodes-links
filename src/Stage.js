@@ -129,11 +129,11 @@ class Stage extends Base {
       }
       links.push(sprite)
     }
-    this.container.append(sprite.render())
-    setTimeout(_ => {
+    let $dom = sprite.render()
+    $dom.addEventListener('afterrender', function() {
       sprite.dispatchEvent('mounted', {})
-      this.checkForceLink()
     })
+    this.container.append($dom)
   }
   clear() {
     this.steps = []
