@@ -12,7 +12,7 @@ class Stage extends Base {
       selector: '',
       zoom: [0.5, 2],
       forceLink: false,
-      layout: []
+      layout: [],
     }
 
     let thisAttrs = Object.assign(defaultAttrs, attrs)
@@ -33,7 +33,7 @@ class Stage extends Base {
     this.layers = Object.create(null)
     this.layers['default'] = scene.layer('default')
     this.layers.default.append(this.container)
-    this.checkForceLink = throttle(ani => {
+    this.checkForceLink = throttle((ani) => {
       let forceLink = this.attr('forceLink')
       if (getType(ani) === 'boolean') {
         this.__forceAni = ani
@@ -54,7 +54,7 @@ class Stage extends Base {
       }
     }, 0)
     if (this.attr('zoom') !== false) {
-      this.containers.forEach(container => {
+      this.containers.forEach((container) => {
         zoom.call(this, container.layer, container)
       })
     }
@@ -75,7 +75,7 @@ class Stage extends Base {
     }
     let [oX, oY] = this.container.attr('pos')
     if (this.nodes.length > 0) {
-      this.nodes.forEach(sprite => {
+      this.nodes.forEach((sprite) => {
         if (sprite.attr('layout') !== false) {
           //如果layout为false 不参数计算布局
           const [left, top, width, height] = sprite.renderBox
@@ -92,7 +92,7 @@ class Stage extends Base {
   append(sprite) {
     if (sprite === undefined) return
     if (getType(sprite) === 'array') {
-      sprite.forEach(sp => {
+      sprite.forEach((sp) => {
         this.append(sp)
       })
       return
@@ -130,7 +130,7 @@ class Stage extends Base {
       links.push(sprite)
     }
     let $dom = sprite.render()
-    $dom.addEventListener('afterrender', function() {
+    $dom.addEventListener('afterrender', function () {
       sprite.dispatchEvent('mounted', {})
     })
     this.container.append($dom)
@@ -145,18 +145,18 @@ let loop = 0
 let tickLoop = 0
 function tick(ani) {
   //tick函数
-  let nodes = this.nodes
+  let nodes = this.nodes.filter((node) => node.container.attr('display') !== 'none')
   let links = this.links
-  let nodesAttr = this.nodes.map(node => {
+  let nodesAttr = this.nodes.map((node) => {
     return { ...filterClone(node.__attrs), __pos: node.__attrs.pos, ...filterClone(node, ['renderBox', '__dragging', 'sizeBox', 'forceDistance']) }
   })
-  let linksAttr = links.map(link => link.__attrs)
+  let linksAttr = links.map((link) => link.__attrs)
   let animate = true
   if (!ani) {
     loop = 0
     computeResult(nodesAttr, linksAttr)
-    nodes.forEach(node => {
-      let attr = nodesAttr.filter(attr => attr.id === node.__attrs.id)
+    nodes.forEach((node) => {
+      let attr = nodesAttr.filter((attr) => attr.id === node.__attrs.id)
       if (attr && attr.length) {
         node.attr({ pos: attr[0].pos })
       }
@@ -165,15 +165,15 @@ function tick(ani) {
   } else {
     animate = computeForce(nodesAttr, linksAttr)
     let needMove = false
-    nodesAttr.forEach(node => {
+    nodesAttr.forEach((node) => {
       if (node.__pos && getDistansceByPoints(node.pos, node.__pos) > 0.01) {
         node.pos = node.__pos
         needMove = true
       }
     })
     if (needMove) {
-      nodes.forEach(node => {
-        let attr = nodesAttr.filter(attr => attr.id === node.__attrs.id)
+      nodes.forEach((node) => {
+        let attr = nodesAttr.filter((attr) => attr.id === node.__attrs.id)
         if (attr && attr.length) {
           node.attr({ pos: attr[0].pos })
         }
@@ -208,7 +208,7 @@ function computeResult(nodes, links) {
   //最少计算50次，最多计算1000次
   if (loop <= 50 || (ani && loop < 1000)) {
     loop++
-    nodes.forEach(node => {
+    nodes.forEach((node) => {
       if (node.__pos) {
         node.pos = node.__pos
       }
@@ -324,7 +324,7 @@ function zoom(layer, group) {
   let oX, oY
   let startX, startY
   let draged = false
-  layer.addEventListener('mousedown', e => {
+  layer.addEventListener('mousedown', (e) => {
     if (e.originalEvent.which === 3) {
       return
     }
@@ -333,7 +333,7 @@ function zoom(layer, group) {
     ;[startX, startY] = group.attr('pos')
     draged = true
   })
-  layer.addEventListener('mousemove', e => {
+  layer.addEventListener('mousemove', (e) => {
     if (draged) {
       let dx = e.x - oX
       let dy = e.y - oY
@@ -341,13 +341,13 @@ function zoom(layer, group) {
       this.reSize()
     }
   })
-  layer.addEventListener('mouseleave', e => {
+  layer.addEventListener('mouseleave', (e) => {
     draged = false
   })
-  layer.addEventListener('mouseup', e => {
+  layer.addEventListener('mouseup', (e) => {
     draged = false
   })
-  layer.addEventListener('mousewheel', e => {
+  layer.addEventListener('mousewheel', (e) => {
     e.preventDefault()
     const [scaleX] = group.attr('scale')
     let [w, h] = group.attr('size')
@@ -368,7 +368,7 @@ function zoom(layer, group) {
     if (scaleX + dscale > zoom[0] && scaleX + dscale < zoom[1]) {
       group.transition(0).attr({
         scale: [scaleX + dscale, scaleX + dscale],
-        pos: [oX - dx, oY - dy]
+        pos: [oX - dx, oY - dy],
       })
     }
   })
