@@ -2,7 +2,7 @@ import { Group, Node } from 'spritejs'
 import { getType } from './utils'
 import { draggable } from 'next-draggable'
 import filterClone from 'filter-clone'
-Node.prototype.clear = function() {
+Node.prototype.clear = function () {
   for (let i = 0; i < this.children.length; i++) {
     this.children[i].remove()
     i--
@@ -15,12 +15,20 @@ class Base extends Node {
     this.sizeBox = [0, 0, 0, 0] // 尺寸内部大小
     this.renderBox = [0, 0, 0, 0] // 坐标大小
     this.__attrs = filterClone(null)
+    this.__isDragging = false
     this.container = new Group()
     this.container.attr({ size: [0.1, 0.1] }) // 将group设置成非常小，不影响其他dom，并且不clip内部元素
-    ;['dragstart', 'drag', 'dragend', 'dragover', 'dragenter', 'dragleave', 'drop'].forEach(evt => {
+    ;['dragstart', 'drag', 'dragend', 'dragover', 'dragenter', 'dragleave', 'drop'].forEach((evt) => {
       // 透传container上的事件
-      this.container.addEventListener(evt, e => {
+      this.container.addEventListener(evt, (e) => {
         this.dispatchEvent(evt, e)
+        if (evt === 'drag') {
+          this.__isDragging = true
+        } else if (evt === 'dragend') {
+          setTimeout((_) => {
+            this.__isDragging = false
+          })
+        }
       })
     })
     this.addEventListener('mounted', this.mounted)
@@ -34,7 +42,11 @@ class Base extends Node {
     super.addEventListener(type, func)
     let eventList = ['click', 'dblclick', 'mouseenter', 'mouseleave', 'mousemove', 'mousedown', 'contextmenu']
     if (eventList.indexOf(type) !== -1) {
-      this.container.addEventListener(type, func)
+      this.container.addEventListener(type, (...args) => {
+        if (!this.__isDragging) {
+          func(...args)
+        }
+      })
     }
   }
   pointCollision() {
@@ -42,7 +54,7 @@ class Base extends Node {
   }
   append(sprites) {
     if (getType(sprites) === 'array') {
-      sprites.forEach(sprite => {
+      sprites.forEach((sprite) => {
         this.container.append(sprite)
       })
     } else {
@@ -93,7 +105,7 @@ class Base extends Node {
     }
     let [oX, oY] = this.container.attr('pos')
     if (container.children.length > 0) {
-      container.children.forEach(sprite => {
+      container.children.forEach((sprite) => {
         if (sprite.attr('layout') !== false && sprite.mesh) {
           //如果layout为false 不参数计算布局
           const [left, top, width, height] = sprite.originalClientRect
